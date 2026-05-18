@@ -1,0 +1,3637 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<title>AMS_UI_2.1</title>
+<style>
+:root{
+  --pink:#ff2d78; --pink2:#ff77aa;
+  --purple:#aa33ff; --purple2:#cc88ff;
+  --cyan:#00d4ff; --cyan2:#66eeff;
+  --green:#00ff88; --green2:#66ffbb;
+  --yellow:#ffdd00; --orange:#ff8800;
+  --bg:#3a3a72; --bg2:#3a3a78;
+  --panel:#1e1e3c; --panel2:#222244;
+  --border:#3a3a72; --border2:#383870;
+  --text:#fff; --text2:#fff;
+  --lcd:#04040e;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:none;}
+html,body{height:100%;height:100dvh;overflow:hidden;background:#888;}
+body{display:flex;justify-content:center;}
+#app{width:100%;max-width:440px;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#0a1a3a;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);box-sizing:border-box;}
+
+/* ─ TAB BAR ─ */
+.tab-bar{display:flex;background:#333370;flex-shrink:0;border-bottom:1px solid var(--border);}
+.tab-btn{flex:1;background:transparent;color:#fff;border:none;padding:6px 1px;font-size:9.5px;font-weight:bold;cursor:pointer;letter-spacing:.2px;transition:.15s;border-bottom:2px solid transparent;}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(0,212,255,.07);}
+
+/* ─ HEADER ─ */
+.header{background:linear-gradient(90deg,#333370,#3a3a72);color:var(--text);font-size:11px;font-weight:bold;padding:7px 12px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.hdr-title{font-size:13px;font-weight:900;letter-spacing:1.5px;background:linear-gradient(90deg,var(--pink),var(--purple),var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hdr-right{display:flex;align-items:center;gap:5px;}
+.saved-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.hdr-sub{font-size:8.5px;color:var(--text2);}
+
+/* ─ CHASSIS ─ */
+.chassis{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+.screen-page{display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0;}
+.screen-page.active{display:flex;}
+
+/* ─ SEL BAR (below LCD) ─ */
+.sel-bar{display:flex;background:#333370;flex-shrink:0;padding:3px 6px;gap:4px;border-bottom:1px solid var(--border);}
+.sel-btn{flex:1;border-radius:5px;padding:5px 2px;font-size:10px;font-weight:bold;text-align:center;cursor:pointer;border:1px solid #999;color:#444;background:linear-gradient(180deg,#d0d0d0,#b8b8b8);transition:.15s;}
+.sel-btn.active{color:#fff;}
+.sel-btn.drum.active{background:linear-gradient(180deg,#ffaa44,#ff8800);border-color:#ff8800;box-shadow:0 0 8px rgba(255,136,0,.5);color:#fff;}
+.sel-btn.bass-a.active{background:linear-gradient(180deg,#ff6699,#cc0033);border-color:#cc0033;color:#fff;transition:none;}
+.sel-btn.bass-b.active{background:linear-gradient(180deg,#cc77ff,#8800cc);border-color:#8800cc;color:#fff;transition:none;}
+.sel-btn.synth.active{background:linear-gradient(180deg,#88ccff,#2288dd);border-color:#0066bb;color:#fff;box-shadow:0 0 8px rgba(0,150,255,.4);}
+.sel-btn.mix.active{background:linear-gradient(180deg,#88ffcc,#00cc88);border-color:#009966;color:#003322;box-shadow:0 0 8px rgba(0,200,130,.4);}
+.sel-btn.fx1.active{background:linear-gradient(180deg,#ffee88,#ddaa00);border-color:#aa7700;color:#333;}
+.sel-btn.fx2.active{background:linear-gradient(180deg,#66aaff,#2277ee);border-color:#0044cc;color:#fff;}
+.sel-btn.reverb.active{background:linear-gradient(180deg,#66ff88,#22cc44);border-color:#00aa22;color:#002211;box-shadow:0 0 8px rgba(0,200,60,.4);}
+
+/* ─ PAGE BAR ─ */
+.page-bar{display:flex;gap:2px;padding:1px 4px;background:var(--panel);flex-shrink:0;border-bottom:1px solid var(--border);}
+.pbtn{flex:1;border-radius:3px;padding:3px 1px;font-size:8px;font-weight:bold;text-align:center;cursor:pointer;border:1px solid #666;background:linear-gradient(180deg,#aaaaaa,#909090);color:#777;}
+.pbtn.active{background:linear-gradient(180deg,#d8d8d8,#c0c0c0);border-color:#999;color:#cc0000;}
+.cpbtn-copy{flex:1;border-radius:3px;padding:3px 1px;font-size:8px;font-weight:bold;text-align:center;cursor:pointer;border:1px solid #00aa44;background:linear-gradient(180deg,#44ee88,#00cc55);color:#003322;}
+.cpbtn-paste{flex:1;border-radius:3px;padding:3px 1px;font-size:8px;font-weight:bold;text-align:center;cursor:pointer;border:1px solid #cc6600;background:linear-gradient(180deg,#ffaa44,#ff8800);color:#fff;}
+.cpbtn-clr{flex:1;border-radius:3px;padding:3px 1px;font-size:8px;font-weight:bold;text-align:center;cursor:pointer;border:1px solid #22aacc;background:linear-gradient(180deg,#aae8ff,#55ccee);color:#003344;}
+
+/* ─ KNOB SECTION (compact) ─ */
+.knob-section{background:var(--panel);padding:2px 4px;display:flex;align-items:center;gap:3px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-shrink:0;}
+.mode-btns{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:0 2px;}
+.mode-btn{width:24px;height:16px;border-radius:4px;font-size:7px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);background:#3a3a72;color:var(--text2);transition:.15s;}
+.mode-btn.active{color:#fff;}
+.mode-btn.ac{background:linear-gradient(180deg,#ff8888,#dd2222);border:1px solid #aa0000;color:#fff;}
+.mode-btn.sl{background:linear-gradient(180deg,#88ff99,#22cc44);border:1px solid #009922;color:#003311;}
+.mode-btn.flm{background:linear-gradient(180deg,#b8e8ff,#7ec8ee);border:2px solid #1a70a8;color:#1a70a8;} .mode-btn.flm.active{background:linear-gradient(180deg,#7ec8ee,#2288cc);border:2px solid #0a5580;color:#fff;}
+.mode-btn.vel{background:linear-gradient(180deg,#ffd9a0,#ffb85a);border:2px solid #cc8833;color:#996600;} .mode-btn.vel.active{background:linear-gradient(180deg,#ffb85a,#ee8800);border:2px solid #aa5500;color:#fff;}
+.knobs-row{display:flex;flex:1;justify-content:space-evenly;align-items:center;}
+.knob-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
+.knob-name{font-size:7px;color:var(--text2);font-weight:bold;letter-spacing:.3px;text-transform:uppercase;}
+.knob-body{position:relative;width:36px;height:36px;cursor:pointer;flex-shrink:0;}
+.knob-svg{position:absolute;top:0;left:0;width:36px;height:36px;}
+.knob-dial{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2e2e52,#14142a 70%,#0a0a1a);border:1px solid var(--border2);position:absolute;top:4px;left:4px;box-shadow:0 2px 5px rgba(0,0,0,.8),inset 0 1px 1px rgba(255,255,255,.1);}
+.knob-ind{position:absolute;top:50%;left:50%;width:1.5px;height:9px;border-radius:1px;transform-origin:bottom center;}
+.knob-val{font-size:8px;font-weight:bold;color:var(--text);text-align:center;min-width:28px;line-height:1;}
+.lcd-section{background:#000;flex-shrink:0;padding:4px 8px 5px;}
+.lcd-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--border2);position:relative;box-shadow:0 0 20px rgba(0,0,0,.8),inset 0 0 0 1px #1a1a3a;}
+canvas#seqCanvas{display:block;width:100%;}
+
+/* ─ PAGE DOTS ─ */
+.phbar{display:flex;gap:5px;padding:3px;justify-content:center;background:transparent;flex-shrink:0;}
+.ph-dot{width:8px;height:8px;border-radius:50%;background:#3a3a72;cursor:pointer;transition:.15s;border:1px solid #3a3a72;}
+.ph-dot.on{background:var(--cyan);box-shadow:0 0 6px var(--cyan);border-color:var(--cyan);}
+
+/* ─ KNOB SECTION ─ */
+.knob-section{background:var(--panel);padding:1px 4px;display:flex;align-items:center;gap:3px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-shrink:0;}
+.mode-btns{display:flex;flex-direction:column;gap:2px;padding:0 2px;min-width:110px;}
+.mode-btns-row{display:flex;gap:2px;}
+.mode-btn{width:54px;height:14px;border-radius:4px;font-size:7px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);background:#3a3a72;color:var(--text2);transition:.15s;}
+.mode-btn.active{color:#fff;}
+.mode-btn.flm{background:linear-gradient(180deg,#b8e8ff,#7ec8ee);border:2px solid #1a70a8;color:#1a70a8;} .mode-btn.flm.active{background:linear-gradient(180deg,#7ec8ee,#2288cc);border:2px solid #0a5580;color:#fff;}
+.mode-btn.vel{background:linear-gradient(180deg,#ffd9a0,#ffb85a);border:2px solid #cc8833;color:#996600;} .mode-btn.vel.active{background:linear-gradient(180deg,#ffb85a,#ee8800);border:2px solid #aa5500;color:#fff;}
+.mode-btn.rndm-a{background:#ff2d78;color:#fff;border-color:#cc0055;width:64px;}
+.mode-btn.rndm-b{background:#aa33ff;color:#fff;border-color:#7700cc;width:64px;}
+.mode-btn.rndm-sy{background:#2288dd;color:#fff;border-color:#0055aa;width:64px;}
+.key-btn{min-width:28px;height:14px;border-radius:4px;font-size:7px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid #888;background:linear-gradient(180deg,#d8d8d8,#b0b0b0);color:#333;padding:0 4px;box-shadow:0 2px 0 #888;}
+.key-val{min-width:24px;height:14px;border-radius:3px;font-size:7px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:1px solid #334;background:#0a0a1e;color:#ffdd00;padding:0 3px;}
+.knobs-row{display:flex;flex:1;justify-content:flex-end;align-items:center;gap:4px;padding-right:4px;}
+.knob-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
+.knob-name{font-size:7px;color:var(--text2);font-weight:bold;letter-spacing:.3px;text-transform:uppercase;}
+.knob-body{position:relative;width:36px;height:36px;cursor:pointer;flex-shrink:0;}
+.knob-svg{position:absolute;top:0;left:0;width:36px;height:36px;}
+.knob-dial{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2e2e52,#14142a 70%,#0a0a1a);border:1px solid var(--border2);position:absolute;top:4px;left:4px;box-shadow:0 2px 5px rgba(0,0,0,.8),inset 0 1px 1px rgba(255,255,255,.1);}
+.knob-ind{position:absolute;top:50%;left:50%;width:1.5px;height:9px;border-radius:1px;transform-origin:bottom center;}
+.knob-val{font-size:8px;font-weight:bold;color:var(--text);text-align:center;min-width:28px;line-height:1;}
+
+/* ─ SLITS ─ */
+.slits{background:var(--panel2);padding:2px 16px;display:flex;flex-direction:column;gap:3px;flex-shrink:0;}
+.slit{height:2px;background:#2e2e62;border-radius:1px;box-shadow:inset 0 1px 1px rgba(0,0,0,.8);}
+
+/* ─ PADS ─ */
+.pad-section{background:var(--panel2);padding:3px 7px;flex-shrink:0;}
+.pad-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.pad{border-radius:5px;color:#fff;font-size:9px;font-weight:bold;cursor:pointer;height:26px;display:flex;align-items:center;justify-content:center;transition:.08s;text-shadow:0 1px 2px rgba(0,0,0,.6);}
+.pad:active{transform:translateY(1px);filter:brightness(.85);}
+.pad-0,.pad-1,.pad-2,.pad-3,.pad-4,.pad-5,.pad-6,.pad-7,.pad-8,.pad-9{background:linear-gradient(180deg,#ffaa44,#ff8800);border:1px solid #ff8800;color:#fff;box-shadow:0 2px 0 #883300,0 0 6px rgba(255,136,0,.3);}
+
+/* ─ BASS CONTROLS ─ */
+.bass-ctl{display:flex;gap:3px;padding:3px 7px;background:var(--panel2);flex-shrink:0;align-items:center;border-top:1px solid var(--border);}
+.bctl{padding:3px 7px;border-radius:4px;font-size:9px;font-weight:bold;cursor:pointer;border:1px solid var(--border2);background:#3a3a72;color:var(--text2);transition:.15s;}
+.bctl.active-ac{background:linear-gradient(180deg,#ffee88,var(--yellow));border-color:var(--yellow);color:#333;box-shadow:0 0 6px rgba(255,221,0,.4);}
+.bctl.active-sl{background:linear-gradient(180deg,var(--green2),var(--green));border-color:var(--green);color:#003322;box-shadow:0 0 6px rgba(0,255,136,.4);}
+.bctl-oct{padding:3px 6px;border-radius:4px;font-size:10px;cursor:pointer;border:1px solid var(--border2);background:#3a3a72;color:var(--cyan);}
+.oct-disp{flex:1;text-align:right;font-size:10px;font-weight:bold;color:var(--cyan2);padding-right:4px;}
+
+/* ─ FOOTER ─ */
+.footer{background:linear-gradient(180deg,var(--bg2),#0d0d22);padding:3px 5px 5px;border-top:1px solid var(--border);flex-shrink:0;margin-top:auto;margin-bottom:60px;}
+.footer-r1{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:2px;}
+.footer-r2{display:flex;gap:2px;margin-bottom:2px;}
+.footer-r2 .fb{min-height:29px;font-size:10px;}
+.footer-r3,.footer-r4{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-bottom:1px;}
+.fb{border-radius:4px;font-size:9px;font-weight:bold;cursor:pointer;padding:3px 1px;text-align:center;display:flex;align-items:center;justify-content:center;min-height:22px;border:1px solid #333;transition:.08s;color:#fff;line-height:1.1;}
+.fb:active{transform:translateY(1px);filter:brightness(.85);}
+.fb-cyan{background:linear-gradient(180deg,var(--cyan2),var(--cyan));border-color:var(--cyan);color:#003344;box-shadow:0 2px 0 #005577;}
+.fb-pink{background:linear-gradient(180deg,var(--pink2),var(--pink));border-color:var(--pink);box-shadow:0 2px 0 #880033;}
+.fb-pink.active{box-shadow:0 0 10px var(--pink);}
+.fb-purple{background:linear-gradient(180deg,var(--purple2),var(--purple));border-color:var(--purple);box-shadow:0 2px 0 #550088;}
+.fb-green{background:linear-gradient(180deg,var(--green2),var(--green));border-color:var(--green);color:#003322;box-shadow:0 2px 0 #006633;}
+.fb-orange{background:linear-gradient(180deg,#ffbb77,var(--orange));border-color:var(--orange);box-shadow:0 2px 0 #663300;}
+.fb-orange.active{box-shadow:0 0 10px var(--orange);}
+.fb-yellow{background:linear-gradient(180deg,#ffee88,var(--yellow));border-color:var(--yellow);color:#333;box-shadow:0 2px 0 #886600;}
+.fb-gray{background:linear-gradient(180deg,#282848,#1e1e3a);color:var(--text2);border-color:var(--border2);box-shadow:0 2px 0 #0a0a1a;}
+.fb-lblue{background:linear-gradient(180deg,#aae8ff,#55ccee);border-color:#22aacc;color:#003344;box-shadow:0 2px 0 #005577;}
+.fb-gray.active{background:linear-gradient(180deg,#3a3a6a,#3a3a72);color:#fff;box-shadow:0 1px 0 #0a0a1a;}
+/* Set A〜E ボタン */
+.ss-btn{background:linear-gradient(180deg,#d0d0d0,#b8b8b8);border:1px solid #999;color:#444;border-radius:4px;font-size:9px;font-weight:bold;cursor:pointer;padding:3px 1px;text-align:center;display:flex;align-items:center;justify-content:center;min-height:22px;flex:1;transition:.08s;}
+.ss-btn.active{background:linear-gradient(180deg,#d8d8d8,#c0c0c0);color:#cc0000;font-weight:900;}
+.ss-btn.unused{background:linear-gradient(180deg,#aaaaaa,#909090);color:#888;}
+.fb-start{font-size:10px;font-weight:900;}
+.fb-pat{background:linear-gradient(180deg,#f0f0f0,#e0e0e0);border-color:#aaa;color:#333;box-shadow:0 2px 0 #888;}
+.fb-pat.active{background:linear-gradient(180deg,#66ffbb,#00ff88);border-color:#00cc66;color:#003322;box-shadow:0 2px 0 #006633;}
+
+/* ─ KNOB DETAIL ─ */
+.kd-panel{background:#2e2e62;border-top:1px solid #000;border-bottom:1px solid #000;padding:2px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;height:24px;}
+.kd-info{display:flex;align-items:center;gap:6px;}
+.kd-part{font-size:10px;font-weight:bold;color:#ff8800;font-family:monospace;}
+.kd-param{font-size:9px;font-weight:bold;color:#555;font-family:monospace;text-transform:uppercase;}
+.kd-val{font-size:13px;font-weight:900;color:#ff8800;font-family:monospace;letter-spacing:1px;text-shadow:0 0 6px #ff8800;margin-left:auto;}
+/* ─ MASTER FX RACK ─ */
+.mfx-rack{background:#c8c8c8;padding:4px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;flex:1;}
+.rack-unit{background:linear-gradient(180deg,#d8d8d8,#b8b8b8);border:1px solid #888;border-radius:4px;padding:3px 6px;box-shadow:inset 0 1px 2px rgba(255,255,255,.6),0 2px 4px rgba(0,0,0,.3);}
+.rack-label{font-size:8px;font-weight:bold;color:#333;letter-spacing:.5px;margin-bottom:2px;display:flex;align-items:center;gap:4px;}
+.rack-label::before{content:'';width:5px;height:5px;border-radius:50%;background:#00ff44;box-shadow:0 0 4px #00ff44;display:inline-block;}
+.rack-knobs{display:flex;gap:4px;align-items:flex-end;flex-wrap:wrap;}
+.rack-onbtn{width:12px;height:12px;border-radius:50%;background:#00ff44;box-shadow:0 0 5px #00ff44;border:1.5px solid #009922;cursor:pointer;flex-shrink:0;}
+.rack-onbtn.off{background:#444;box-shadow:none;border-color:#222;}
+.rack-1knob{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
+.r1k-lbl{font-size:9px;font-weight:bold;color:#111;text-align:center;}
+.fx-sel-btn{padding:3px 7px;border-radius:4px;font-size:8.5px;font-weight:bold;cursor:pointer;background:#aaa;border:1px solid #888;color:#333;box-shadow:0 2px 0 #666;}
+.fx-sel-btn.active{background:linear-gradient(180deg,#ffee88,#ddaa00);border-color:#aa7700;color:#222;box-shadow:0 0 6px rgba(255,200,0,.4);}
+.rack-btn.on{background:linear-gradient(180deg,#ffee88,#ddaa00);border-color:#aa7700;color:#222;}
+.rack-btns{display:flex;gap:3px;margin-top:4px;}
+.rack-unit-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.rack-1knob{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
+.r1k-lbl{font-size:7px;font-weight:bold;color:#444;text-align:center;}
+.rack-iso{gap:8px;}
+.rack-select{background:linear-gradient(180deg,#d8d8d8,#b8b8b8);border:1px solid #888;border-radius:4px;padding:3px 6px;font-size:9px;font-weight:bold;color:#333;cursor:pointer;min-width:90px;}
+
+/* ─ PLACEHOLDER PAGES ─ */
+.placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text2);}
+.placeholder-title{font-size:18px;font-weight:bold;letter-spacing:2px;background:linear-gradient(90deg,var(--pink),var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.placeholder-sub{font-size:11px;color:#445;}
+/* ─ BASS ボタン点滅 ─ */
+@keyframes blinkBassA{
+  0%,100%{box-shadow:0 0 8px rgba(255,45,120,.35);}
+  50%{box-shadow:0 0 18px rgba(255,45,120,.9), 0 0 6px #ff2d78;}
+}
+@keyframes blinkBassB{
+  0%,100%{box-shadow:0 0 8px rgba(170,51,255,.35);}
+  50%{box-shadow:0 0 18px rgba(170,51,255,.9), 0 0 6px #aa33ff;}
+}
+.sel-btn.bass-a.active{ animation:blinkBassA 1.6s ease-in-out infinite; }
+.sel-btn.bass-b.active{ animation:blinkBassB 1.6s ease-in-out infinite; }
+.fxblk{background:var(--panel);border:1px solid var(--border2);border-radius:6px;overflow:hidden;}
+.fxblk-hd{display:flex;align-items:center;gap:5px;padding:5px 8px;cursor:pointer;background:var(--panel2,#0f0f25);}
+.fxled{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.fxtitle{font-size:10px;font-weight:bold;letter-spacing:.5px;}
+.fxtype{font-size:8px;color:#445;margin-left:2px;}
+.fxonbtn{margin-left:auto;font-size:8px;font-weight:bold;padding:2px 7px;border:1px solid #333;border-radius:4px;cursor:pointer;color:#444;}
+.fxonbtn.on{color:var(--green);border-color:var(--green);}
+.fxbody{padding:5px 8px;display:flex;flex-direction:column;gap:4px;}
+.fxkrow{display:flex;gap:6px;justify-content:space-evenly;padding:2px 0;}
+.fxmk{display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;}
+.fxmk-lbl{font-size:7px;color:#445;font-weight:bold;}
+.fxmk-val{font-size:7px;font-weight:bold;color:var(--text);}
+.fxsend{display:flex;align-items:center;gap:3px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:4px;}
+.fxslbl{font-size:7px;color:#445;font-weight:bold;min-width:28px;}
+.fxstag{font-size:7px;font-weight:bold;}
+.fxsl{width:34px;height:10px;}
+.fxsv{font-size:7px;color:var(--text2);min-width:14px;text-align:right;}
+/* ─ SETTING PAGE ─ */
+.setgrp{background:var(--panel);border:1px solid var(--border2);border-radius:6px;overflow:hidden;}
+.setgrp-title{font-size:9px;font-weight:bold;letter-spacing:1px;padding:3px 8px;background:var(--panel2,#0f0f25);border-bottom:1px solid var(--border);}
+.setrow{display:flex;align-items:center;padding:5px 8px;border-bottom:1px solid var(--border);gap:5px;}
+.setrow:last-child{border-bottom:none;}
+.setlbl{font-size:9px;color:#889;flex:1;}
+.setstep{display:flex;align-items:center;gap:3px;}
+.setstepbtn{font-size:10px;color:var(--cyan);cursor:pointer;padding:0 2px;line-height:1;user-select:none;}
+.setstepval{font-size:9px;font-weight:bold;color:var(--text);min-width:30px;text-align:center;font-family:monospace;}
+.settogwrap{display:flex;align-items:center;gap:5px;}
+.settog{width:26px;height:14px;border-radius:7px;background:#3a3a72;border:1px solid var(--border2);cursor:pointer;position:relative;transition:.15s;}
+.settog.on{background:var(--green);}
+.settogknob{width:10px;height:10px;border-radius:50%;background:#fff;position:absolute;top:1px;left:1px;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.5);}
+.settog.on .settogknob{left:13px;}
+.settoglbl{font-size:8px;color:#445;}
+.settoglbl.on{color:var(--green);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('seq',this)">SEQUENCER</button>
+    
+    <button class="tab-btn" onclick="switchTab('fx',this)">MASTER FX</button>
+    <button class="tab-btn" onclick="switchTab('set',this)">SETTING</button>
+    <button class="tab-btn" onclick="switchTab('song',this)">SONG</button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="hdr-title">eighty-seven <span style="-webkit-text-fill-color:#ff2d78;color:#ff2d78;text-shadow:0 0 8px #ff2d78;">A.M.S</span></div>
+    <div class="hdr-right">
+      <span class="saved-dot" id="savedDot"></span>
+      <span class="hdr-sub">SAVED</span>
+      <span style="width:20px;height:20px;border-radius:50%;background:#3a3a72;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text2);cursor:pointer;">?</span>
+    </div>
+  </div>
+
+  <!-- CHASSIS -->
+  <div class="chassis">
+
+    <!-- ══ SEQUENCER PAGE ══ -->
+    <div class="screen-page active" id="page-seq">
+
+      <!-- LCD -->
+      <div class="lcd-section">
+        <div class="lcd-wrap">
+          <canvas id="seqCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- SELECT BUTTONS (below LCD) -->
+      <div class="sel-bar">
+        <div class="sel-btn drum active" id="st-drum" onclick="cycleSub('drum',this)">DRUM</div>
+        <div class="sel-btn bass-a" id="st-bassa" onclick="cycleSub('bass-a',this)">BASS-A</div>
+        <div class="sel-btn bass-b" id="st-bassb" onclick="cycleSub('bass-b',this)">BASS-B</div>
+        <div class="sel-btn synth" id="st-synth" onclick="cycleSub('synth',this)">SYNTH</div>
+        <div class="sel-btn mix" id="st-mix" onclick="mixCycle(this)">MIX</div>
+        <div class="sel-btn fx1" id="st-fx" onclick="cycleSub('seqfx',this)">FX</div>
+      </div>
+
+      <!-- PAGE + COPY/PASTE/CLR -->
+      <div class="page-bar">
+        <div class="pbtn active" onclick="setPage(0)">1-16</div>
+        <div class="pbtn" onclick="setPage(1)">17-32</div>
+        <div class="pbtn" onclick="setPage(2)">33-48</div>
+        <div class="pbtn" onclick="setPage(3)">49-64</div>
+        <div class="cpbtn-copy">COPY</div>
+        <div class="cpbtn-paste">PASTE</div>
+        <div class="cpbtn-clr">CLR</div>
+      </div>
+
+      <!-- KNOB SECTION (compact) -->
+      <div class="knob-section">
+        <div class="mode-btns" style="display:flex;flex-direction:row;gap:6px;align-items:flex-start;">
+          <!-- 左: FLM/VEL, AC/SL -->
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div style="display:flex;gap:3px;">
+              <div class="mode-btn flm" id="flmBtn">FLM</div>
+              <div class="mode-btn vel" id="velBtn">VEL</div>
+            </div>
+            <div style="display:flex;gap:3px;">
+              <div class="mode-btn ac">AC</div>
+              <div class="mode-btn sl">SL</div>
+            </div>
+          </div>
+          <!-- 右: RNDM A/B/SY + Key + 値窓 -->
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div style="display:flex;align-items:center;gap:3px;">
+              <div class="mode-btn rndm-a" id="rndmABtn">RNDM A</div>
+              <div class="key-btn" onclick="openKeySelect('A')">Key</div>
+              <div class="key-val" id="keyBtnA">－</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;">
+              <div class="mode-btn rndm-b" id="rndmBBtn">RNDM B</div>
+              <div class="key-btn" onclick="openKeySelect('B')">Key</div>
+              <div class="key-val" id="keyBtnB">－</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;">
+              <div class="mode-btn rndm-sy" id="rndmSYBtn">RNDM SY</div>
+              <div class="key-btn" onclick="openKeySelect('SY')">Key</div>
+              <div class="key-val" id="keyBtnSY">－</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key selector popup -->
+        <div id="keySelectPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a3a;border:2px solid #00d4ff;border-radius:8px;padding:8px;z-index:1000;min-width:260px;">
+          <div style="font-size:10px;font-weight:bold;color:#00d4ff;margin-bottom:6px;text-align:center;">KEY SELECT</div>
+          <div id="keySelectGrid" style="display:grid;grid-template-columns:repeat(12,1fr);gap:2px;margin-bottom:4px;"></div>
+          <div style="display:flex;justify-content:center;margin-top:4px;">
+            <div onclick="selectKey(null)" style="padding:4px 20px;border-radius:4px;background:#333;border:1px solid #666;color:#aaa;font-size:9px;font-weight:bold;cursor:pointer;">－</div>
+          </div>
+        </div>
+        <div class="knobs-row" id="knobsRow"></div>
+      </div>
+
+      <!-- SLITS -->
+      <div class="slits"><div class="slit"></div><div class="slit"></div></div>
+
+      <!-- PADS / KEYBOARD -->
+      <div class="pad-section">
+        <div class="pad-grid" id="padGrid"></div>
+        <div id="synthKeyboard" style="display:none;flex-direction:column;gap:4px;">
+          <div id="keyboardWrap" style="position:relative;height:56px;background:#111;border-radius:4px;overflow:hidden;border:1px solid #334;"></div>
+          <div style="display:flex;gap:4px;justify-content:center;">
+            <div id="octDownBtn" onclick="synthOctave(-1)" style="padding:4px 18px;border-radius:4px;background:linear-gradient(180deg,#3a3a72,#1a1a44);border:1px solid #556;color:#aabbff;font-size:10px;font-weight:bold;cursor:pointer;">OCT −</div>
+            <div id="octDisplay" style="padding:4px 12px;border-radius:4px;background:#0a0a22;border:1px solid #334;color:#00d4ff;font-size:10px;font-weight:bold;min-width:36px;text-align:center;">4</div>
+            <div id="octUpBtn" onclick="synthOctave(1)" style="padding:4px 18px;border-radius:4px;background:linear-gradient(180deg,#3a3a72,#1a1a44);border:1px solid #556;color:#aabbff;font-size:10px;font-weight:bold;cursor:pointer;">OCT +</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KNOB DETAIL strip -->
+      <div class="kd-panel" id="kdPanel"></div>
+
+    </div><!-- /seq -->
+
+    <!-- ══ MIX & EDIT PAGE ══ -->
+    <div class="screen-page" id="page-mix">
+      <div style="background:#2e2e62;padding:3px 6px 3px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:4px;">
+        <span style="font-size:9px;font-weight:bold;color:var(--cyan);letter-spacing:1px;">MIX &amp; EDIT</span>
+        <div style="margin-left:auto;display:flex;gap:3px;">
+          <div id="mxBtnDrum" class="sel-btn drum active" style="flex:none;padding:3px 7px;font-size:9px;" onclick="mixSwitch('drum',this)">DRUM</div>
+          <div id="mxBtnBassA" class="sel-btn bass-a" style="flex:none;padding:3px 7px;font-size:9px;" onclick="mixSwitch('bass-a',this)">BASS-A</div>
+          <div id="mxBtnBassB" class="sel-btn bass-b" style="flex:none;padding:3px 7px;font-size:9px;" onclick="mixSwitch('bass-b',this)">BASS-B</div>
+        </div>
+      </div>
+      <div class="lcd-section" style="flex:1;display:flex;flex-direction:column;">
+        <div class="lcd-wrap" style="flex:1;"><canvas id="mixCanvas" style="display:block;width:100%;height:100%;"></canvas></div>
+      </div>
+      <div style="background:var(--panel);border-top:1px solid var(--border);padding:3px 8px;flex-shrink:0;display:flex;gap:5px;align-items:center;">
+        <span style="font-size:8px;font-weight:bold;color:#666;min-width:26px;">MASTER</span>
+        <div style="flex:1;height:12px;background:#2e2e62;border:1px solid var(--border2);border-radius:3px;position:relative;overflow:hidden;">
+          <div style="height:100%;width:80%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:2px;"></div>
+        </div>
+        <span style="font-size:9px;font-weight:bold;color:var(--cyan);min-width:22px;text-align:right;">100</span>
+        <div class="fb fb-gray" style="font-size:8px;padding:2px 5px;min-height:0;">SOLO</div>
+        <div class="fb fb-gray" style="font-size:8px;padding:2px 5px;min-height:0;">MUTE</div>
+      </div>
+    </div>
+
+    <!-- ══ MASTER FX PAGE ══ -->
+    <div class="screen-page" id="page-fx">
+
+      <!-- LCD SE.XY only -->
+      <div class="lcd-section">
+        <div class="lcd-wrap">
+          <canvas id="mfxCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- RACK SECTION -->
+      <div class="mfx-rack">
+
+        <!-- RACK 1: COMP 1176 + PARAM EQ -->
+        <div class="rack-unit">
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <div style="flex:1.2;min-width:0;">
+              <div class="rack-label"><div class="rack-onbtn" id="compOnBtn"></div>COMP 1176</div>
+              <div class="rack-knobs" id="compKnobs" style="justify-content:space-between;width:100%;"></div>
+            </div>
+            <div style="width:1px;background:#999;align-self:stretch;margin:0 3px;"></div>
+            <div style="flex:1;min-width:0;">
+              <div class="rack-label"><div class="rack-onbtn" id="eqOnBtn"></div>PARAM EQ</div>
+              <div class="rack-knobs" id="eqKnobs" style="justify-content:space-between;width:100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RACK 2: SEND FX (left) + ISOLATOR with buttons (right) -->
+        <div class="rack-unit" style="padding:4px 6px 19px;">
+          <div style="display:flex;gap:6px;align-items:flex-start;">
+
+            <!-- SEND FX left -->
+            <div style="flex:1;min-width:0;">
+              <div class="rack-label" style="margin-bottom:4px;">SEND FX</div>
+              <div style="display:flex;gap:4px;justify-content:space-between;">
+                <div class="rack-1knob">
+                  <div class="r1k-lbl">FLG</div>
+                  <div id="r1kk0"></div>
+                </div>
+                <div class="rack-1knob">
+                  <div class="r1k-lbl">DLY</div>
+                  <div id="r1kk1"></div>
+                </div>
+                <div class="rack-1knob">
+                  <div class="r1k-lbl">FLT</div>
+                  <div id="r1kk2"></div>
+                </div>
+                <div class="rack-1knob">
+                  <div class="r1k-lbl">LOFI</div>
+                  <div id="r1kk3"></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="width:1px;background:#999;align-self:stretch;"></div>
+
+            <!-- ISOLATOR right: knobs + buttons -->
+            <div style="flex:1;min-width:0;">
+              <div class="rack-label" id="isoLabel" style="margin-bottom:4px;">ISOLATOR</div>
+              <div style="display:flex;gap:4px;align-items:flex-start;">
+                <!-- 3 knobs -->
+                <div style="display:flex;gap:4px;flex:1;justify-content:space-around;">
+                  <div class="rack-1knob">
+                    <div class="r1k-lbl">LOW</div>
+                    <div id="isoK0"></div>
+                  </div>
+                  <div class="rack-1knob">
+                    <div class="r1k-lbl">MID</div>
+                    <div id="isoK1"></div>
+                  </div>
+                  <div class="rack-1knob">
+                    <div class="r1k-lbl">HIGH</div>
+                    <div id="isoK2"></div>
+                  </div>
+                </div>
+                <!-- buttons right column: ISO/DIST top, then 2x2 grid -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;flex-shrink:0;">
+                  <div class="fx-sel-btn active" onclick="fxSelBtn(this)">ISO</div>
+                  <div class="fx-sel-btn" onclick="fxSelBtn(this)">DIST</div>
+                  <div class="fx-sel-btn" onclick="fxSelBtn(this)">LPF</div>
+                  <div class="fx-sel-btn" onclick="fxSelBtn(this)">HPF</div>
+                  <div class="fx-sel-btn" onclick="fxSelBtn(this)">BIT</div>
+                  <div class="fx-sel-btn" onclick="fxSelBtn(this)">LOFI</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /rack -->
+
+    </div>
+
+    <!-- ══ SETTING PAGE ══ -->
+    <div class="screen-page" id="page-set">
+      <div style="flex:1;overflow-y:auto;padding:0;display:flex;flex-direction:column;background:#e8e8e8;">
+
+        <!-- ── SAMPLE LOAD ── -->
+        <div style="padding:3px 6px 1px;background:#d0d0d0;border-bottom:1px solid #bbb;">
+          <span style="font-size:9px;font-weight:bold;color:#333;letter-spacing:.5px;">SAMPLE LOAD</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1px;padding:2px 4px;background:#e0e0e0;">
+          <!-- CY OH CH: green field + LOAD + X -->
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;width:20px;text-align:right;">CY</span>
+            <input type="text" value="CYM 2205 16.wav" readonly style="flex:1;background:#88dd88;border:1px solid #66aa66;border-radius:2px;font-size:9px;color:#003300;padding:2px 4px;font-family:monospace;">
+            <div style="background:#ff8800;color:#fff;font-size:8px;font-weight:bold;padding:3px 6px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;">LOAD</div>
+            <div style="background:#dd2222;color:#fff;font-size:10px;font-weight:bold;width:18px;height:18px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid #aa0000;">✕</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;width:20px;text-align:right;">OH</span>
+            <input type="text" value="OHT2205 16.wav" readonly style="flex:1;background:#88dd88;border:1px solid #66aa66;border-radius:2px;font-size:9px;color:#003300;padding:2px 4px;font-family:monospace;">
+            <div style="background:#ff8800;color:#fff;font-size:8px;font-weight:bold;padding:3px 6px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;">LOAD</div>
+            <div style="background:#dd2222;color:#fff;font-size:10px;font-weight:bold;width:18px;height:18px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid #aa0000;">✕</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;width:20px;text-align:right;">CH</span>
+            <input type="text" value="Nama CH 16bit.wav" readonly style="flex:1;background:#88dd88;border:1px solid #66aa66;border-radius:2px;font-size:9px;color:#003300;padding:2px 4px;font-family:monospace;">
+            <div style="background:#ff8800;color:#fff;font-size:8px;font-weight:bold;padding:3px 6px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;">LOAD</div>
+            <div style="background:#dd2222;color:#fff;font-size:10px;font-weight:bold;width:18px;height:18px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid #aa0000;">✕</div>
+          </div>
+          <!-- T1 T2 CP SD BD: light field + LOAD only -->
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;width:20px;text-align:right;">T1</span>
+            <input type="text" value="T1 Default" readonly style="flex:1;background:#c8e8c8;border:1px solid #aaccaa;border-radius:2px;font-size:9px;color:#224422;padding:2px 4px;font-family:monospace;">
+            <div style="background:#ff8800;color:#fff;font-size:8px;font-weight:bold;padding:3px 6px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;">LOAD</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;width:20px;text-align:right;">T2</span>
+            <input type="text" value="T2 Default" readonly style="flex:1;background:#c8e8c8;border:1px solid #aaccaa;border-radius:2px;font-size:9px;color:#224422;padding:2px 4px;font-family:monospace;">
+            <div style="background:#ff8800;color:#fff;font-size:8px;font-weight:bold;padding:3px 6px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;">LOAD</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;width:20px;text-align:right;">CP</span>
+            <input type="text" value="CP Default" readonly style="flex:1;background:#c8e8c8;border:1px solid #aaccaa;border-radius:2px;font-size:9px;color:#224422;padding:2px 4px;font-family:monospace;">
+            <div style="background:#ff8800;color:#fff;font-size:8px;font-weight:bold;padding:3px 6px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;">LOAD</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;width:20px;text-align:right;">SD</span>
+            <input type="text" value="SD Default" readonly style="flex:1;background:#c8e8c8;border:1px solid #aaccaa;border-radius:2px;font-size:9px;color:#224422;padding:2px 4px;font-family:monospace;">
+            <div style="background:#ff8800;color:#fff;font-size:8px;font-weight:bold;padding:3px 6px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;">LOAD</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;width:20px;text-align:right;">BD</span>
+            <input type="text" value="BD Default" readonly style="flex:1;background:#c8e8c8;border:1px solid #aaccaa;border-radius:2px;font-size:9px;color:#224422;padding:2px 4px;font-family:monospace;">
+            <div style="background:#ff8800;color:#fff;font-size:8px;font-weight:bold;padding:3px 6px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;">LOAD</div>
+          </div>
+        </div>
+
+        <!-- ── SOUND SET ── -->
+        <div style="padding:3px 6px 1px;background:#d0d0d0;border-bottom:1px solid #bbb;border-top:1px solid #bbb;">
+          <span style="font-size:9px;font-weight:bold;color:#333;letter-spacing:.5px;">SOUND SET</span>
+        </div>
+        <div style="padding:4px 4px 2px;background:#e0e0e0;display:flex;flex-direction:column;gap:3px;">
+          <div style="display:flex;gap:3px;">
+            <div style="flex:1;background:linear-gradient(180deg,#dd44cc,#aa00aa);color:#fff;font-size:9px;font-weight:bold;text-align:center;padding:5px 2px;border-radius:4px;cursor:pointer;border:1px solid #880088;">CREATE PATTERN</div>
+            <div style="flex:1;background:linear-gradient(180deg,#44ddee,#00aacc);color:#fff;font-size:9px;font-weight:bold;text-align:center;padding:5px 2px;border-radius:4px;cursor:pointer;border:1px solid #008899;">LOAD ALL PRESET</div>
+          </div>
+          <div style="font-size:8px;font-weight:bold;color:#555;text-align:center;letter-spacing:.5px;">SAVE SOUND SET</div>
+          <div style="display:flex;gap:2px;">
+            <div style="flex:1;background:#f0f0f0;border:1px solid #ccc;border-radius:3px;font-size:9px;font-weight:bold;color:#ff2d78;text-align:center;padding:3px 0;cursor:pointer;">A</div>
+            <div style="flex:1;background:#f0f0f0;border:1px solid #ccc;border-radius:3px;font-size:9px;font-weight:bold;color:#aa33ff;text-align:center;padding:3px 0;cursor:pointer;">B</div>
+            <div style="flex:1;background:#f0f0f0;border:1px solid #ccc;border-radius:3px;font-size:9px;font-weight:bold;color:#00aacc;text-align:center;padding:3px 0;cursor:pointer;">C</div>
+            <div style="flex:1;background:#f0f0f0;border:1px solid #ccc;border-radius:3px;font-size:9px;font-weight:bold;color:#00aa44;text-align:center;padding:3px 0;cursor:pointer;">D</div>
+            <div style="flex:1;"></div>
+          </div>
+          <div style="display:flex;gap:2px;">
+            <div style="flex:1;background:linear-gradient(180deg,#ff77aa,#cc0055);color:#fff;font-size:8px;font-weight:bold;text-align:center;padding:4px 0;border-radius:3px;cursor:pointer;border:1px solid #aa0044;">EXPORT A</div>
+            <div style="flex:1;background:linear-gradient(180deg,#ff77aa,#cc0055);color:#fff;font-size:8px;font-weight:bold;text-align:center;padding:4px 0;border-radius:3px;cursor:pointer;border:1px solid #aa0044;">EXPORT B</div>
+            <div style="flex:1;background:#cccccc;color:#555;font-size:8px;font-weight:bold;text-align:center;padding:4px 0;border-radius:3px;cursor:pointer;border:1px solid #aaa;">EXPORT C</div>
+            <div style="flex:1;background:#cccccc;color:#555;font-size:8px;font-weight:bold;text-align:center;padding:4px 0;border-radius:3px;cursor:pointer;border:1px solid #aaa;">EXPORT D</div>
+            <div style="flex:1;background:linear-gradient(180deg,#44ccee,#0088bb);color:#fff;font-size:8px;font-weight:bold;text-align:center;padding:4px 0;border-radius:3px;cursor:pointer;border:1px solid #0066aa;">IMPORT</div>
+          </div>
+        </div>
+
+        <!-- ── GLOBAL ── -->
+        <div style="padding:3px 6px 1px;background:#d0d0d0;border-bottom:1px solid #bbb;border-top:1px solid #bbb;">
+          <span style="font-size:9px;font-weight:bold;color:#333;letter-spacing:.5px;">GLOBAL</span>
+        </div>
+        <div style="padding:4px 6px;background:#e0e0e0;display:flex;flex-direction:column;gap:3px;">
+        <!-- LOCK row 1 -->
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;flex:1;">MIX LOCK</span>
+            <div id="lockMix" onclick="toggleLock('lockMix')" style="background:linear-gradient(180deg,#ffaa44,#ff8800);color:#fff;font-size:8px;font-weight:bold;padding:2px 7px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;min-width:28px;text-align:center;">ON</div>
+            <span style="font-size:9px;font-weight:bold;color:#333;flex:1;text-align:right;">FX LOCK</span>
+            <div id="lockFx" onclick="toggleLock('lockFx')" style="background:linear-gradient(180deg,#ffaa44,#ff8800);color:#fff;font-size:8px;font-weight:bold;padding:2px 7px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;min-width:28px;text-align:center;">ON</div>
+          </div>
+          <!-- LOCK row 2 -->
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;flex:1;">BANK LOCK</span>
+            <div id="lockBank" onclick="toggleLock('lockBank')" style="background:linear-gradient(180deg,#ffaa44,#ff8800);color:#fff;font-size:8px;font-weight:bold;padding:2px 7px;border-radius:3px;cursor:pointer;border:1px solid #cc5500;min-width:28px;text-align:center;">ON</div>
+            <span style="font-size:9px;font-weight:bold;color:#333;flex:1;text-align:right;font-size:8px;color:#888;">バンクごとにBPM/SWING保持</span>
+          </div>
+          <!-- CLOCK OUT -->
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:9px;font-weight:bold;color:#333;">CLOCK OUT</span>
+            <div id="clkOutBtn" onclick="toggleClkOut()" style="background:#888;color:#fff;font-size:8px;font-weight:bold;padding:2px 7px;border-radius:3px;cursor:pointer;border:1px solid #666;min-width:28px;text-align:center;">OFF</div>
+            <select style="flex:1;font-size:8px;padding:2px 3px;border:1px solid #bbb;border-radius:3px;background:#f8f8f8;color:#333;">
+              <option>+1 Normal</option>
+              <option>+2 Double</option>
+              <option>24ppq</option>
+              <option>48ppq</option>
+            </select>
+          </div>
+          <!-- JSON / WAV / BAKE -->
+          <div style="display:flex;gap:3px;">
+            <div style="flex:1;background:linear-gradient(180deg,#ff77aa,#cc0055);color:#fff;font-size:8px;font-weight:bold;text-align:center;padding:5px 0;border-radius:4px;cursor:pointer;border:1px solid #aa0044;">EXPORT JSON</div>
+            <div style="flex:1;background:linear-gradient(180deg,#44ccee,#0088bb);color:#fff;font-size:8px;font-weight:bold;text-align:center;padding:5px 0;border-radius:4px;cursor:pointer;border:1px solid #006699;">IMPORT JSON</div>
+          </div>
+          <div style="display:flex;gap:3px;">
+            <div style="flex:1;background:linear-gradient(180deg,#ff5555,#cc0000);color:#fff;font-size:8px;font-weight:bold;text-align:center;padding:5px 0;border-radius:4px;cursor:pointer;border:1px solid #aa0000;">WAV</div>
+            <div style="flex:1;background:linear-gradient(180deg,#ff5555,#cc0000);color:#fff;font-size:8px;font-weight:bold;text-align:center;padding:5px 0;border-radius:4px;cursor:pointer;border:1px solid #aa0000;">BAKE HTML</div>
+          </div>
+          <div style="font-size:7px;color:#888;text-align:right;font-family:monospace;">AMS 2.1</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SONG PAGE ══ -->
+    <div class="screen-page" id="page-song">
+
+      <!-- トップバー: PLAY / STOP / SONG選択 / +ADD / CLEAR -->
+      <div style="display:flex;align-items:center;gap:3px;padding:4px 5px;background:#c8c8c8;border-bottom:1px solid #aaa;flex-shrink:0;">
+        <div id="songPlayBtn" onclick="songTogglePlay()" style="background:linear-gradient(180deg,#44ddff,#0099cc);color:#fff;font-size:9px;font-weight:bold;padding:5px 10px;border-radius:4px;cursor:pointer;border:1px solid #0077aa;white-space:nowrap;">▶ PLAY</div>
+        <div onclick="songStop()" style="background:#e0e0e0;color:#333;font-size:9px;font-weight:bold;padding:5px 8px;border-radius:4px;cursor:pointer;border:1px solid #aaa;white-space:nowrap;">■ STOP</div>
+        <select id="songSel" style="flex:1;font-size:9px;padding:4px 3px;border:1px solid #aaa;border-radius:4px;background:#f0f0f0;color:#333;">
+          <option>SONG 1</option>
+          <option>SONG 2</option>
+          <option>SONG 3</option>
+          <option>SONG 4</option>
+        </select>
+        <div onclick="songAddRow()" style="background:linear-gradient(180deg,#ffcc44,#ff8800);color:#fff;font-size:9px;font-weight:bold;padding:5px 8px;border-radius:4px;cursor:pointer;border:1px solid #cc6600;white-space:nowrap;">+ADD</div>
+        <div onclick="songClear()" style="background:#e0e0e0;color:#333;font-size:9px;font-weight:bold;padding:5px 8px;border-radius:4px;cursor:pointer;border:1px solid #aaa;white-space:nowrap;">CLEAR</div>
+      </div>
+
+      <!-- グローバルBPM選択 -->
+      <div style="padding:3px 5px;background:#d0d0d0;border-bottom:1px solid #bbb;flex-shrink:0;">
+        <select style="width:100%;font-size:9px;padding:3px 4px;border:1px solid #bbb;border-radius:3px;background:#f0f0f0;color:#444;">
+          <option>-- GLOBAL (no change) --</option>
+          <option>BPM 80</option>
+          <option>BPM 100</option>
+          <option>BPM 120</option>
+          <option>BPM 140</option>
+          <option>BPM 160</option>
+        </select>
+      </div>
+
+      <!-- テーブルヘッダー -->
+      <div style="display:grid;grid-template-columns:16px 36px 36px 36px 1fr 60px 44px 22px;gap:1px;padding:2px 4px;background:#b8b8b8;border-bottom:1px solid #999;flex-shrink:0;">
+        <div style="font-size:8px;font-weight:bold;color:#444;text-align:center;">#</div>
+        <div style="font-size:8px;font-weight:bold;color:#444;text-align:center;">BNK</div>
+        <div style="font-size:8px;font-weight:bold;color:#444;text-align:center;">PTN</div>
+        <div style="font-size:8px;font-weight:bold;color:#444;text-align:center;">RPT</div>
+        <div style="font-size:8px;font-weight:bold;color:#444;text-align:center;">COMMENT</div>
+        <div style="font-size:8px;font-weight:bold;color:#444;text-align:center;">BPM</div>
+        <div style="font-size:8px;font-weight:bold;color:#444;text-align:center;">BPM VAL</div>
+        <div style="font-size:8px;font-weight:bold;color:#444;text-align:center;">X</div>
+      </div>
+
+      <!-- ソングチェーン行リスト -->
+      <div id="songChain" style="flex:1;overflow-y:auto;background:#d4d4d4;display:flex;flex-direction:column;gap:1px;padding:1px 0;">
+      </div>
+
+    </div>
+
+  </div><!-- /chassis -->
+
+  <!-- FOOTER 共通 -->
+  <div class="footer">
+    <div class="footer-r1" id="ssRow">
+      <div class="ss-btn active" onclick="selSS(0,this)">Sound Set A</div>
+      <div class="ss-btn" onclick="selSS(1,this)">Sound Set B</div>
+      <div class="ss-btn unused" onclick="selSS(2,this)">Sound Set C</div>
+      <div class="ss-btn unused" onclick="selSS(3,this)">Sound Set D</div>
+      <div class="ss-btn unused" onclick="selSS(4,this)">Sound Set E</div>
+    </div>
+    <div class="footer-r2">
+      <div class="fb fb-cyan fb-start" style="flex:1.2;" id="btnStart" onclick="togglePlay()">▶ START</div>
+      <div class="fb fb-pink" style="flex:.9;" onclick="stopPlay()">■ STOP</div>
+      <div class="fb fb-lblue" style="flex:.9;">CLEAR</div>
+      <div class="fb fb-pink" style="flex:.9;" id="btnWrite">WRITE</div>
+      <div class="fb fb-orange" style="flex:.9;" id="btnFill">FILL</div>
+      <div class="fb fb-purple" style="flex:1.3;font-size:10px;font-weight:900;" id="btnBank" onclick="cycleBank(1)" oncontextmenu="cycleBank(-1);return false;">BANK A</div>
+    </div>
+    <div class="footer-r3" id="stepRow1"></div>
+    <div class="footer-r4" id="stepRow2"></div>
+  </div>
+</div><!-- /app -->
+
+<script>
+// ── Constants ──────────────────────────────────────
+const DRUM_PARTS  = ['RY','CY','OH','CH','RM','T1','T2','CP','SD','BD'];
+const DRUM_COLORS = ['#88aaff','#ffdd00','#00ff88','#00d4ff','#ff6644',
+                     '#ff77cc','#66ffee','#aa33ff','#ff2d78','#ff8800'];
+const PAD_PARTS   = ['RM','CH','OH','CY','RY','BD','SD','CP','T1','T2'];
+const PAD_COLORS  = ['#ff6644','#00d4ff','#00ff88','#ffdd00','#88aaff',
+                     '#ff8800','#ff2d78','#aa33ff','#ff77cc','#66ffee'];
+const BASS_COLORS = { 'bass-a':'#ff2d78', 'bass-b':'#aa33ff' };
+
+const NOTE_NAMES  = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const IS_BLACK    = [0,1,0,1,0,0,1,0,1,0,1,0];
+
+// ── State ──────────────────────────────────────────
+let currentSub  = 'drum';
+let currentPage = 0;
+let velMode     = false;
+let flamMode    = false;
+let bassInputMode = null; // null | 'ac' | 'sl'
+let bassOct     = [3, 3]; // A, B
+let bassScrollX = [0, 0]; // 横スクロール（ステップオフセット、将来拡張用）
+let bassScrollY = [0, 0]; // 縦スクロール（音域オフセット、半音単位）
+let playing     = false;
+let playStep    = -1;
+
+const drumGrid = Array.from({length:10}, ()=>new Uint8Array(64)); // 0=off,1=lo,2=mid,3=hi
+const flamGrid = Array.from({length:10}, ()=>new Uint8Array(64));
+const bassNotes= [Array(16).fill(null), Array(16).fill(null)];
+const bassAC   = [new Uint8Array(16), new Uint8Array(16)];
+const bassSL   = [new Uint8Array(16), new Uint8Array(16)];
+
+// Knob data
+const drumKnobs = [
+  {id:'STEP', name:'STEP',  v:16, min:1,  max:64,  color:'#00d4ff'},
+  {id:'TMPO', name:'TEMPO', v:120,min:40, max:240, color:'#aa33ff'},
+  {id:'SWNG', name:'SWING', v:0,  min:0,  max:100, color:'#ff2d78'},
+  {id:'VOL',  name:'VOL',   v:80, min:0,  max:127, color:'#00ff88'},
+];
+const bassKnobs = [
+  {id:'CUT', name:'CUT',  v:80, min:0, max:127, color:'#ff2d78'},
+  {id:'RES', name:'RES',  v:30, min:0, max:127, color:'#aa33ff'},
+  {id:'ENV', name:'ENV',  v:50, min:0, max:127, color:'#00d4ff'},
+  {id:'DEC', name:'DEC',  v:50, min:0, max:127, color:'#00ff88'},
+  {id:'VOL', name:'VOL',  v:80, min:0, max:127, color:'#ffdd00'},
+];
+
+// ── Tab switching ──────────────────────────────────
+function toggleLock(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const on=el.textContent.trim()==='ON';
+  el.textContent=on?'OFF':'ON';
+  el.style.background=on?'linear-gradient(180deg,#888,#666)':'linear-gradient(180deg,#ffaa44,#ff8800)';
+  el.style.borderColor=on?'#555':'#cc5500';
+}
+function toggleClkOut(){
+  const el=document.getElementById('clkOutBtn');
+  if(!el) return;
+  const on=el.textContent.trim()==='ON';
+  el.textContent=on?'OFF':'ON';
+  el.style.background=on?'#888':'linear-gradient(180deg,#ffaa44,#ff8800)';
+  el.style.borderColor=on?'#666':'#cc5500';
+}
+function switchTab(id, btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.screen-page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(id==='fx') setTimeout(initMfxCanvas,10);
+}
+
+// ── Sub-tab switching ──────────────────────────────
+// cycle modes: drum→drum_mix, bass-a→bass-a_mix, bass-b→bass-b_mix
+const subModes = {
+  drum:   ['drum','drum-mix'],
+  'bass-a':['bass-a','bass-a-mix'],
+  'bass-b':['bass-b','bass-b-mix'],
+  synth:  ['synth','synth-mix'],
+  mix:    ['mix','mix-edit'],
+  seqfx:  ['seqfx','seqfx-edit'],
+  fx1:['fx1'], fx2:['fx2'], reverb:['reverb']
+};
+const subCycle = {drum:0,'bass-a':0,'bass-b':0,synth:0,mix:0,seqfx:0,fx1:0,fx2:0,reverb:0};
+
+function cycleSub(base, el){
+  subCycle[base] = (subCycle[base]+1) % subModes[base].length;
+  currentSub = subModes[base][subCycle[base]];
+  document.querySelectorAll('.sel-btn').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  // update label
+  const labels = {
+    drum:['DRUM','DRUM EDIT'],
+    'bass-a':['BASS-A','BASS-A EDIT'],
+    'bass-b':['BASS-B','BASS-B EDIT'],
+    synth:['SYNTH','SYNTH EDIT'],
+    mix:['MIX','MIX EDIT'],
+    seqfx:['FX','FX EDIT'],
+    fx1:['FX1'], fx2:['FX2'], reverb:['REVERB']
+  };
+  el.textContent = labels[base][subCycle[base]];
+  // RNDM-A/Bボタンはbass系のときのみ表示
+  const isBass = (base==='bass-a'||base==='bass-b');
+  const rA=document.getElementById('rndmABtn');
+  const rB=document.getElementById('rndmBBtn');
+  // Show keyboard or pads
+  updatePadKeyboard();
+  drawCanvas();
+}
+
+let synthOct=4;
+function updatePadKeyboard(){
+  const isSynth=currentSub==='synth'||currentSub==='synth-mix'
+              ||currentSub==='bass-a'||currentSub==='bass-a-mix'
+              ||currentSub==='bass-b'||currentSub==='bass-b-mix';
+  const padGrid=document.getElementById('padGrid');
+  const kb=document.getElementById('synthKeyboard');
+  if(!padGrid||!kb) return;
+  if(isSynth){
+    padGrid.style.display='none';
+    kb.style.display='flex';
+    drawKeyboard();
+  } else {
+    padGrid.style.display='';
+    kb.style.display='none';
+  }
+}
+
+function synthOctave(dir){
+  synthOct=Math.max(1,Math.min(8,synthOct+dir));
+  document.getElementById('octDisplay').textContent=synthOct;
+}
+
+function drawKeyboard(){
+  const wrap=document.getElementById('keyboardWrap');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  const W=wrap.clientWidth||300, H=56;
+  const notes=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B','C'];
+  const isBlack=[0,1,0,1,0,0,1,0,1,0,1,0,0].map(v=>v===1);
+  const whites=notes.filter((_,i)=>!isBlack[i]);
+  const wW=Math.floor(W/whites.length);
+
+  // draw on canvas
+  const cv=document.createElement('canvas');
+  cv.width=W; cv.height=H; cv.style.cssText='position:absolute;top:0;left:0;';
+  wrap.appendChild(cv);
+  const c=cv.getContext('2d');
+
+  // white keys
+  whites.forEach((n,i)=>{
+    c.fillStyle='#f0ece0'; c.strokeStyle='#888'; c.lineWidth=.8;
+    c.beginPath(); c.roundRect(i*wW+1,0,wW-2,H,2); c.fill(); c.stroke();
+    c.fillStyle='#666'; c.font='bold 7px monospace';
+    c.textAlign='center'; c.textBaseline='bottom';
+    if(n==='C') c.fillText('C'+synthOct,i*wW+wW/2,H-1);
+  });
+
+  // black keys
+  let wi=0;
+  notes.forEach((n,ni)=>{
+    if(isBlack[ni]){
+      const bx=wi*wW-Math.floor(wW*.3);
+      c.fillStyle='#1a1a2a'; c.strokeStyle='#000'; c.lineWidth=.8;
+      c.beginPath(); c.roundRect(bx,0,Math.floor(wW*.55),H*.62,2); c.fill(); c.stroke();
+    } else {
+      wi++;
+    }
+  });
+}
+
+// ── Mode toggles ───────────────────────────────────
+function toggleMode(m){
+  if(m==='flm'){ flamMode=!flamMode; velMode=false; }
+  else          { velMode=!velMode;  flamMode=false; }
+  document.getElementById('flmBtn').classList.toggle('active', flamMode);
+  document.getElementById('velBtn').classList.toggle('active', velMode);
+}
+
+function toggleBassMode(m){
+  if(bassInputMode===m) bassInputMode=null;
+  else bassInputMode=m;
+  document.getElementById('bctlAC').className = 'bctl'+(bassInputMode==='ac'?' active-ac':'');
+  document.getElementById('bctlSL').className = 'bctl'+(bassInputMode==='sl'?' active-sl':'');
+}
+
+function changeOct(d){
+  const bi = currentSub==='bass-a'?0:1;
+  bassOct[bi] = Math.max(1,Math.min(5,bassOct[bi]+d));
+  document.getElementById('octDisp').textContent = 'OCT '+bassOct[bi];
+  drawCanvas();
+}
+
+// ── BANK 状態管理（A〜H） ─────────────────────────
+const BANK_NAMES=['A','B','C','D','E','F','G','H'];
+let curBankIdx=0;
+
+// バンクごとの設定（BANK LOCKがONの時はこちらを使用）
+const bankState = BANK_NAMES.map(nm=>({
+  name: nm,
+  bpm: 120,
+  swing: 0,
+  swingType: 'A',
+  // 将来: mixLock, fxLock 等
+}));
+
+function curBank(){ return bankState[curBankIdx]; }
+
+function cycleBank(dir=1){
+  curBankIdx=(curBankIdx+dir+8)%8;
+  const btn=document.getElementById('btnBank');
+  if(btn) btn.textContent='BANK '+BANK_NAMES[curBankIdx];
+}
+
+// ── Sound Set ─────────────────────────────────────
+function selSS(i,btn){
+  document.querySelectorAll('#ssRow .ss-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Transport ─────────────────────────────────────
+function togglePlay(){
+  playing = !playing;
+  const b = document.getElementById('btnStart');
+  if(playing){ b.classList.remove('fb-cyan'); b.classList.add('fb-green'); b.textContent='■ STOP'; }
+  else        { b.classList.remove('fb-green'); b.classList.add('fb-cyan'); b.textContent='▶ START'; playStep=-1; drawCanvas(); }
+}
+function stopPlay(){ if(playing) togglePlay(); }
+
+// ── Knobs ─────────────────────────────────────────
+function buildKnobs(defs){
+  const row = document.getElementById('knobsRow');
+  row.innerHTML = '';
+  defs.forEach((k,i)=>{
+    const norm = (k.v-k.min)/(k.max-k.min);
+    const ang  = -135 + norm*270;
+    const arc  = norm * 0.75 * Math.PI * 2;
+    // SVG arc
+    const r=16, cx=21, cy=21;
+    const startAng=-135*Math.PI/180, endAng=startAng+arc;
+    const x1=cx+r*Math.cos(startAng), y1=cy+r*Math.sin(startAng);
+    const x2=cx+r*Math.cos(endAng),   y2=cy+r*Math.sin(endAng);
+    const la=arc>(Math.PI)?1:0;
+    const svgArc=arc>0.01?`<path d="M${x1},${y1} A${r},${r} 0 ${la} 1 ${x2},${y2}" fill="none" stroke="${k.color}" stroke-width="2.5" stroke-linecap="round"/>`:'';
+    const w = document.createElement('div');
+    w.className = 'knob-wrap';
+    w.dataset.ki = i;
+    w.innerHTML = `
+      <div class="knob-name">${k.name}</div>
+      <div class="knob-body" data-ki="${i}">
+        <svg class="knob-svg" viewBox="0 0 42 42">
+          <circle cx="21" cy="21" r="16" fill="none" stroke="#1a1a3a" stroke-width="2.5"/>
+          ${svgArc}
+        </svg>
+        <div class="knob-dial">
+          <div class="knob-ind" style="background:${k.color};box-shadow:0 0 4px ${k.color};transform:translateX(-50%) translateY(-100%) rotate(${ang}deg)"></div>
+        </div>
+      </div>
+      <div class="knob-val" id="kv-${k.id}">${k.v}</div>`;
+    row.appendChild(w);
+    // drag
+    let drag=false, startY=0, startV=0;
+    const dial = w.querySelector('.knob-body');
+    dial.addEventListener('pointerdown', e=>{
+      drag=true; startY=e.clientY; startV=k.v;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    dial.addEventListener('pointermove', e=>{
+      if(!drag) return;
+      const delta = (startY-e.clientY)*((k.max-k.min)/120);
+      k.v = Math.round(Math.max(k.min, Math.min(k.max, startV+delta)));
+      refreshKnobEl(dial, k);
+    });
+    dial.addEventListener('pointerup', ()=>{drag=false;});
+  });
+}
+
+function refreshKnobEl(el, k){
+  const norm=(k.v-k.min)/(k.max-k.min);
+  const ang=-135+norm*270;
+  const ind=el.querySelector('.knob-ind');
+  if(ind) ind.style.transform=`translateX(-50%) translateY(-100%) rotate(${ang}deg)`;
+  const arc=norm*0.75*Math.PI*2;
+  const r=16,cx=21,cy=21,sa=-135*Math.PI/180,ea=sa+arc;
+  const x1=cx+r*Math.cos(sa),y1=cy+r*Math.sin(sa);
+  const x2=cx+r*Math.cos(ea),y2=cy+r*Math.sin(ea);
+  const svg=el.querySelector('svg');
+  if(svg){
+    const existing=svg.querySelector('path');
+    if(existing) svg.removeChild(existing);
+    if(arc>0.01){
+      const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+      p.setAttribute('d',`M${x1},${y1} A${r},${r} 0 ${arc>Math.PI?1:0} 1 ${x2},${y2}`);
+      p.setAttribute('fill','none'); p.setAttribute('stroke',k.color||k.c||'#ff8800');
+      p.setAttribute('stroke-width','2.5'); p.setAttribute('stroke-linecap','round');
+      svg.appendChild(p);
+    }
+  }
+  const vd=document.getElementById('kv-'+k.id);
+  if(vd) vd.textContent=k.v;
+}
+
+function refreshKnob(i, defs){
+  const k=defs[i];
+  const norm=(k.v-k.min)/(k.max-k.min);
+  const ang=-135+norm*270;
+  const el=document.querySelectorAll('.knob-body')[i];
+  if(!el) return;
+  el.querySelector('.knob-ind').style.transform=`translateX(-50%) translateY(-100%) rotate(${ang}deg)`;
+  const arc=norm*0.75*Math.PI*2;
+  const r=16,cx=21,cy=21,startAng=-135*Math.PI/180,endAng=startAng+arc;
+  const x1=cx+r*Math.cos(startAng),y1=cy+r*Math.sin(startAng);
+  const x2=cx+r*Math.cos(endAng),y2=cy+r*Math.sin(endAng);
+  const la=arc>Math.PI?1:0;
+  const svg=el.querySelector('svg');
+  const existing=svg.querySelector('path');
+  if(existing) svg.removeChild(existing);
+  if(arc>0.01){
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',`M${x1},${y1} A${r},${r} 0 ${la} 1 ${x2},${y2}`);
+    p.setAttribute('fill','none'); p.setAttribute('stroke',k.color);
+    p.setAttribute('stroke-width','2.5'); p.setAttribute('stroke-linecap','round');
+    svg.appendChild(p);
+  }
+  const vd=document.getElementById('kv-'+k.id);
+  if(vd) vd.textContent=k.v;
+}
+
+// ── Pads ──────────────────────────────────────────
+function buildPads(){
+  const g=document.getElementById('padGrid'); g.innerHTML='';
+  PAD_PARTS.forEach((name,i)=>{
+    const p=document.createElement('div');
+    p.className='pad'; p.textContent=name; p.dataset.part=i;
+    p.style.background='linear-gradient(180deg,#ffaa44,#ff8800)';
+    p.style.border='1px solid #ff8800';
+    p.style.boxShadow='0 2px 0 #883300,0 0 6px rgba(255,136,0,.3)';
+    p.style.color='#fff';
+    p.addEventListener('pointerdown',()=>flashPad(p));
+    g.appendChild(p);
+  });
+}
+function flashPad(el){el.style.filter='brightness(.7)';setTimeout(()=>el.style.filter='',100);}
+
+// ── Step buttons ──────────────────────────────────
+function buildStepBtns(){
+  [1,2].forEach(row=>{
+    const el=document.getElementById(`stepRow${row}`); el.innerHTML='';
+    for(let i=(row-1)*8+1;i<=(row)*8;i++){
+      const b=document.createElement('div');
+      b.className='fb fb-pat'; b.id=`sb${i}`; b.textContent=i;
+      b.onclick=()=>selectPat(i);
+      el.appendChild(b);
+    }
+  });
+  selectPat(1);
+}
+function selectPat(n){
+  document.querySelectorAll('#stepRow1 .fb,#stepRow2 .fb').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById(`sb${n}`);
+  if(el) el.classList.add('active');
+}
+
+// ── Page dots ─────────────────────────────────────
+function setPage(n){
+  currentPage=n;
+  document.querySelectorAll('.pbtn').forEach((d,i)=>{
+    d.classList.toggle('active',i===n);
+  });
+  drawCanvas();
+}
+
+// ── Canvas ────────────────────────────────────────
+const canvas=document.getElementById('seqCanvas');
+const ctx=canvas.getContext('2d');
+let dpr=1;
+
+function resizeCanvas(){
+  dpr=window.devicePixelRatio||1;
+  const w=canvas.parentElement.clientWidth;
+  const h=Math.round(w*0.68);
+  canvas.width=Math.round(w*dpr);
+  canvas.height=Math.round(h*dpr);
+  canvas.style.height=h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {w,h};
+}
+
+function drawCanvas(){
+  const {w,h}=resizeCanvas();
+  ctx.clearRect(0,0,w,h);
+  if     (currentSub==='drum')       drawDrum(w,h);
+  else if(currentSub==='drum-mix')   drawDrumEditNew(w,h);
+  else if(currentSub==='bass-a')     drawPianoRoll(w,h);
+  else if(currentSub==='bass-a-mix') drawBassEdit(w,h,0);
+  else if(currentSub==='bass-b')     drawPianoRoll(w,h);
+  else if(currentSub==='bass-b-mix') drawBassEdit(w,h,1);
+  else if(currentSub==='synth')      drawSynthSeq(w,h);
+  else if(currentSub==='synth-mix')  drawSynthEdit(w,h);
+  else if(currentSub==='mix')        drawMixSeq(w,h);
+  else if(currentSub==='mix-edit')   drawMixEdit(w,h);
+  else if(currentSub==='seqfx')      drawFXSeq(w,h);
+  else if(currentSub==='seqfx-edit') drawFXEdit(w,h);
+  else if(currentSub==='fx1')        drawFXScreen(w,h,1);
+  else if(currentSub==='fx2')        drawFXScreen(w,h,2);
+  else if(currentSub==='reverb')     drawReverbScreen(w,h);
+  else drawDrum(w,h);
+}
+
+function drawFXScreen(W,H,fxNum){
+  const borderCol = fxNum===1?'#ffdd00':'#3399ff';
+  const titleCol  = fxNum===1?'#ffdd00':'#3399ff';
+  // bg
+  ctx.fillStyle='#0a0a18'; ctx.fillRect(0,0,W,H);
+  // border
+  ctx.strokeStyle=borderCol; ctx.lineWidth=3;
+  ctx.strokeRect(2,2,W-4,H-4);
+  // title
+  ctx.font='bold 11px monospace'; ctx.fillStyle=titleCol;
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.shadowColor=borderCol; ctx.shadowBlur=8;
+  ctx.fillText(`FX${fxNum}`,8,6); ctx.shadowBlur=0;
+
+  const effects=[
+    {nm:'FLANGER', v1:.5,v2:.4, c:'#ff8800'},
+    {nm:'PHASER',  v1:.6,v2:.3, c:'#aa33ff'},
+    {nm:'BITCRSHR',v1:.7,v2:.5, c:'#ff2d78'},
+    {nm:'FILTER',  v1:.5,v2:.8, c:'#00d4ff'},
+    {nm:'LO-FI',   v1:.4,v2:.6, c:'#00ff88'},
+    {nm:'DELAY',   v1:.5,v2:.4, c:'#ffdd00'},
+  ];
+
+  const cols=3, rows=2;
+  const bw=(W-16)/cols, bh=(H-28)/rows;
+
+  effects.forEach((fx,i)=>{
+    const col=i%cols, row=Math.floor(i/cols);
+    const x=8+col*bw, y=24+row*bh;
+    // fx box
+    ctx.fillStyle='#111128'; ctx.strokeStyle=fx.c+'66'; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(x+2,y+2,bw-4,bh-4,4); ctx.fill(); ctx.stroke();
+    // LED
+    ctx.beginPath(); ctx.arc(x+10,y+10,3,0,Math.PI*2);
+    ctx.fillStyle='#00ff44'; ctx.shadowColor='#00ff44'; ctx.shadowBlur=4; ctx.fill(); ctx.shadowBlur=0;
+    // name
+    ctx.font='bold 8px monospace'; ctx.fillStyle=fx.c;
+    ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText(fx.nm,x+17,y+6);
+    // 2 knobs
+    [fx.v1,fx.v2].forEach((v,ki)=>{
+      const kx=x+18+ki*28, ky=y+bh*.6, kr=10;
+      const kg=ctx.createRadialGradient(kx-3,ky-3,1,kx,ky,kr);
+      kg.addColorStop(0,'#444'); kg.addColorStop(1,'#111');
+      ctx.beginPath(); ctx.arc(kx,ky,kr,0,Math.PI*2);
+      ctx.fillStyle=kg; ctx.fill(); ctx.strokeStyle='#333'; ctx.lineWidth=.8; ctx.stroke();
+      const ea=-135*Math.PI/180+v*270*Math.PI/180;
+      ctx.beginPath(); ctx.arc(kx,ky,kr-2,-135*Math.PI/180,ea);
+      ctx.strokeStyle=fx.c; ctx.lineWidth=2;
+      ctx.shadowColor=fx.c; ctx.shadowBlur=3; ctx.stroke(); ctx.shadowBlur=0;
+      ctx.strokeStyle='#fff'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(kx,ky);
+      ctx.lineTo(kx+Math.cos(ea)*(kr-2),ky+Math.sin(ea)*(kr-2)); ctx.stroke();
+    });
+  });
+}
+
+function drawReverbScreen(W,H){
+  const col='#00ff88';
+  ctx.fillStyle='#0a0a18'; ctx.fillRect(0,0,W,H);
+  // green border
+  ctx.strokeStyle=col; ctx.lineWidth=3;
+  ctx.strokeRect(2,2,W-4,H-4);
+  // title
+  ctx.font='bold 11px monospace'; ctx.fillStyle=col;
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.shadowColor=col; ctx.shadowBlur=8;
+  ctx.fillText('REVERB',8,6); ctx.shadowBlur=0;
+
+  // Type buttons: SCH / IR / HALL / ROOM / PLATE
+  const types=['SCH','IR','HALL','ROOM','PLATE'];
+  const tbw=(W-16)/types.length;
+  types.forEach((t,i)=>{
+    const on=i===0;
+    const tx=8+i*tbw, ty=22, tw=tbw-3, th=16;
+    ctx.fillStyle=on?col:'#1a1a3a'; ctx.strokeStyle=on?col:'#2a2a5a'; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(tx,ty,tw,th,3); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=on?'#002211':'#888'; ctx.font='bold 8px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(t,tx+tw/2,ty+th/2);
+  });
+
+  // Main knobs: SIZE / DECAY / GATE / MIX / VOL
+  const knobs=[
+    {nm:'SIZE', v:.6},{nm:'DECAY',v:.5},{nm:'GATE', v:.2},
+    {nm:'MIX',  v:.4},{nm:'VOL',  v:.8}
+  ];
+  const kspc=(W-16)/knobs.length, kr=18;
+  knobs.forEach((k,i)=>{
+    const kx=8+i*kspc+kspc/2, ky=H*.58;
+    // shadow
+    ctx.beginPath(); ctx.arc(kx+1,ky+2,kr,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,.3)'; ctx.fill();
+    // body
+    const kg=ctx.createRadialGradient(kx-6,ky-6,2,kx,ky,kr);
+    kg.addColorStop(0,'#444'); kg.addColorStop(.6,'#1a1a2a'); kg.addColorStop(1,'#0a0a18');
+    ctx.beginPath(); ctx.arc(kx,ky,kr,0,Math.PI*2);
+    ctx.fillStyle=kg; ctx.fill(); ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.stroke();
+    // track
+    ctx.beginPath(); ctx.arc(kx,ky,kr-3,-135*Math.PI/180,135*Math.PI/180);
+    ctx.strokeStyle='#222'; ctx.lineWidth=3; ctx.stroke();
+    // value arc
+    const ea=-135*Math.PI/180+k.v*270*Math.PI/180;
+    ctx.beginPath(); ctx.arc(kx,ky,kr-3,-135*Math.PI/180,ea);
+    ctx.strokeStyle=col; ctx.lineWidth=3;
+    ctx.shadowColor=col; ctx.shadowBlur=5; ctx.stroke(); ctx.shadowBlur=0;
+    // indicator
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(kx,ky);
+    ctx.lineTo(kx+Math.cos(ea)*(kr-4),ky+Math.sin(ea)*(kr-4)); ctx.stroke();
+    // label
+    ctx.font='bold 8px monospace'; ctx.fillStyle=col;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(k.nm,kx,ky+kr+4);
+    ctx.fillStyle='#fff'; ctx.font='bold 9px monospace';
+    ctx.textBaseline='bottom'; ctx.fillText(Math.round(k.v*100),kx,ky-kr-2);
+  });
+}
+
+
+// ── DRUM EDIT: channel strip style ────────────────────
+function drawDrumEditNew(W,H){
+  const PANEL='#ebe7dd', CARD='#bdb8b2';
+  const HDR_BG='#555555', HDR_BR='#595959', OR='#ff8800';
+
+  ctx.fillStyle=PANEL; ctx.fillRect(0,0,W,H);
+
+  // 3ノブ: 上段2列(TUNE+LEVEL) + 下段左寄り1個
+  // 4ノブ: 上段2列 + 下段2列
+  const grid=[
+    {nm:'RM', r:[['TUNE','LEVEL'],['DECAY']],          row:0,col:0},
+    {nm:'CH', r:[['TUNE','LEVEL'],['TONE','DECAY']],   row:0,col:1},
+    {nm:'OH', r:[['TUNE','LEVEL'],['TONE','DECAY']],   row:0,col:2},
+    {nm:'CY', r:[['TUNE','LEVEL'],['DECAY']],          row:0,col:3},
+    {nm:'RY', r:[['TUNE','LEVEL'],['DECAY']],          row:0,col:4},
+    {nm:'BD', r:[['TUNE','LEVEL'],['ATTACK','DECAY']], row:1,col:0},
+    {nm:'SD', r:[['TUNE','LEVEL'],['TONE','SNAPPY']],  row:1,col:1},
+    {nm:'CP', r:[['TUNE','LEVEL'],['TONE','DECAY']],   row:1,col:2},
+    {nm:'T1', r:[['TUNE','LEVEL'],['DECAY']],          row:1,col:3},
+    {nm:'T2', r:[['TUNE','LEVEL'],['DECAY']],          row:1,col:4},
+  ];
+
+  const COLS=5, ROWS=2, MGAP=4;
+  const cellW=Math.floor((W-MGAP*(COLS+1))/COLS);
+  const cellH=Math.floor((H-MGAP*(ROWS+1))/ROWS);
+  const HDR=20, PAD=4;
+
+  // KR: BD(2×2)基準
+  const bdKAreaH=cellH-HDR-PAD*2;
+  const KR=Math.min(
+    Math.floor(cellW/4)-4,
+    Math.floor(bdKAreaH/4)-6
+  );
+
+  function knob(kx,ky,val,label){
+    const SA=-135*Math.PI/180, EA=135*Math.PI/180;
+    const ea=SA+val*(EA-SA);
+    for(let t=0;t<9;t++){
+      const ta=SA+t*(EA-SA)/8;
+      const r1=KR+3, r2=KR+(t%4===0?7:5);
+      ctx.strokeStyle=t===4?'#777':'#999'; ctx.lineWidth=t%4===0?1.2:.7;
+      ctx.beginPath();
+      ctx.moveTo(kx+Math.cos(ta)*r1,ky+Math.sin(ta)*r1);
+      ctx.lineTo(kx+Math.cos(ta)*r2,ky+Math.sin(ta)*r2);
+      ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(kx+1,ky+1,KR,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,.25)'; ctx.fill();
+    const og=ctx.createRadialGradient(kx-KR*.3,ky-KR*.3,KR*.1,kx,ky,KR);
+    og.addColorStop(0,'#4a4a4a'); og.addColorStop(1,'#181818');
+    ctx.beginPath(); ctx.arc(kx,ky,KR,0,Math.PI*2); ctx.fillStyle=og; ctx.fill();
+    ctx.strokeStyle='#444'; ctx.lineWidth=.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(kx,ky,KR+1.5,SA,ea);
+    ctx.strokeStyle=OR; ctx.lineWidth=1.8; ctx.shadowColor=OR; ctx.shadowBlur=3; ctx.stroke(); ctx.shadowBlur=0;
+    ctx.strokeStyle=OR; ctx.lineWidth=1.8; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(kx,ky);
+    ctx.lineTo(kx+Math.cos(ea)*(KR*.75),ky+Math.sin(ea)*(KR*.75)); ctx.stroke();
+    // ラベル：大きく・濃く
+    ctx.fillStyle='#222'; ctx.font='bold 8px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(label,kx,ky+KR+7);
+  }
+
+  grid.forEach((p,idx)=>{
+    const cx=MGAP+p.col*(cellW+MGAP);
+    const cy=MGAP+p.row*(cellH+MGAP);
+
+    ctx.fillStyle=CARD; ctx.strokeStyle=HDR_BR; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(cx,cy,cellW,cellH,4); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle=HDR_BG; ctx.strokeStyle=HDR_BR; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(cx+1,cy+1,cellW-2,HDR,[3,3,0,0]); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=OR; ctx.font='bold 13px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(p.nm,cx+cellW/2,cy+HDR/2);
+
+    const kAreaY=cy+HDR+PAD;
+    const rowH=(cellH-HDR-PAD*2)/2;
+    const slotW=cellW/2;
+
+    p.r.forEach((rowKnobs,ri)=>{
+      const nk=rowKnobs.length;
+      rowKnobs.forEach((knm,ki)=>{
+        // 1個の場合は左寄り（参考画像通り）
+        const kx=nk===1 ? cx+slotW/2 : cx+ki*slotW+slotW/2;
+        const ky=kAreaY+ri*rowH+rowH/2-5;
+        const val=.35+(ki*17+ri*23+idx*11)%55/100;
+        knob(kx,ky,val,knm);
+      });
+    });
+  });
+
+  ctx.strokeStyle='#c8c4bc'; ctx.lineWidth=2; ctx.strokeRect(2,2,W-4,H-4);
+}
+
+function drawSynthSeq(W,H){ drawPianoRoll(W,H); }
+// ── SYNTHステート ──
+const synthState={
+  mode:'POLY', // POLY/MONO/UNISON/5TH
+  osc1:{wave:'SAW',oct:0,semi:0,fine:0,pwm:.5},
+  osc2:{wave:'SAW',oct:0,semi:0,fine:0,pwm:.5},
+  oscMix:.5, xmod:.0, noiseVol:.0,
+  filter:{type:'LPF',slope:'24dB',cutoff:.7,res:.3,env:.5,vel:.3,drive:.2},
+  amp:{atk:.01,dec:.3,sus:.7,rel:.4,vel:.8},
+  filterEnv:{atk:.01,dec:.2,sus:.4,rel:.3,amount:.5},
+  lfo:{wave:'TRI',rate:.3,depth:.3,dest:'CUTOFF',delay:.0},
+  porta:.0,
+  arp:{on:false,mode:'UP',rate:.5,oct:1},
+  chorus:{type:'CE-1',on:false},
+  delay:{type:'STEREO',on:false,time:.4,fback:.4,mix:.3,bpm:false},
+  reverb:{type:'SHIMMER',on:false,size:.6,damp:.4,mix:.3},
+  sidechain:{on:false,target:'VOL',depth:.5,atk:.01,rel:.3},
+};
+const SYNTH_WAVES=['SAW','SQR','SSAW','TRI'];
+const SYNTH_WAVE_LABELS=['SAW','SQR','S-SAW','TRI'];
+let synthLayout=null, synthScrollY=0, synthDragKnob=null;
+
+function drawSynthEdit(W,H){
+  const s=synthState;
+  if(!s.dco)s.dco={range:1};
+  if(s.hpf===undefined)s.hpf=0;
+
+  // ── JUNO-106 palette ──
+  const BG='#636363', SEC='#6a6a6a', LABEL='#f0eeea', DIM='#484440';
+  const A_VOI='#cc2200', A_DCO='#ee6600', A_VCF='#1166dd';
+  const A_AMP='#00aa44', A_FEV='#00aa88';
+  const A_LFO='#cc8800', A_ARP='#7744bb', A_HPF='#aa9900';
+  const FX_C='#0099ff', FX_D='#ffaa00', FX_R='#aa33ff', FX_S='#ff2d78';
+
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+  const P=2, CW=W-P*2, GAP=2;
+
+  // JUNO-106パネル：全セクション同じダークグレー、上端2pxのみ色
+  function jp(x,y,w,h,ac){
+    ctx.fillStyle=SEC; ctx.strokeStyle='#707070'; ctx.lineWidth=.6;
+    ctx.beginPath(); ctx.roundRect(x,y,w,h,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=ac; ctx.fillRect(x,y,w,2);
+  }
+  function jl(x,y,w,title){
+    ctx.fillStyle=LABEL; ctx.font='bold 5.5px monospace';
+    ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillText(title,x,y);
+    ctx.strokeStyle='#767676'; ctx.lineWidth=.4;
+    const tw=ctx.measureText(title).width;
+    ctx.beginPath(); ctx.moveTo(x+tw+2,y+3); ctx.lineTo(x+w-2,y+3); ctx.stroke();
+  }
+  function jb(x,y,w,h,on,ac,lbl,offBg,offTxt){
+    ctx.fillStyle=on?ac:(offBg||'#272727');
+    ctx.strokeStyle=on?ac:(offBg?'rgba(0,0,0,.25)':'#353330'); ctx.lineWidth=.7;
+    ctx.beginPath(); ctx.roundRect(x,y,w,h,1.5); ctx.fill(); ctx.stroke();
+    if(on){ctx.shadowColor=ac; ctx.shadowBlur=3;}
+    ctx.fillStyle=on?'#fff':(offTxt||DIM);
+    ctx.font='bold '+Math.min(w*.3,5.5)+'px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(lbl,x+w/2,y+h/2); ctx.shadowBlur=0;
+  }
+  function kn(x,ky,val,col,label,sz){
+    const r=sz||9;
+    const ea=-135*Math.PI/180+val*270*Math.PI/180;
+    ctx.beginPath(); ctx.arc(x+1,ky+1,r,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fill();
+    const og=ctx.createRadialGradient(x-r*.3,ky-r*.3,r*.1,x,ky,r);
+    og.addColorStop(0,'#444'); og.addColorStop(1,'#1a1a1a');
+    ctx.beginPath(); ctx.arc(x,ky,r,0,Math.PI*2); ctx.fillStyle=og; ctx.fill();
+    const kg=ctx.createRadialGradient(x-r*.25,ky-r*.25,r*.05,x,ky,r*.85);
+    kg.addColorStop(0,'#d8d0b0'); kg.addColorStop(.6,'#b8b098'); kg.addColorStop(1,'#888070');
+    ctx.beginPath(); ctx.arc(x,ky,r*.85,0,Math.PI*2); ctx.fillStyle=kg; ctx.fill();
+    ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(x,ky);
+    ctx.lineTo(x+Math.cos(ea)*(r*.7),ky+Math.sin(ea)*(r*.7)); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x,ky,r+1.5,-135*Math.PI/180,ea);
+    ctx.strokeStyle=col; ctx.lineWidth=1.2; ctx.shadowColor=col; ctx.shadowBlur=2; ctx.stroke(); ctx.shadowBlur=0;
+    if(label){
+      ctx.fillStyle='#a0a098'; ctx.font='bold 7px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(label,x,ky+r+2);
+    }
+  }
+  function vs(x,y,val,col,lbl,TH){
+    const BW=14,BH=9,TW=5, tx=x+(BW-TW)/2;
+    ctx.fillStyle='#0e0e0e'; ctx.strokeStyle='#575757'; ctx.lineWidth=.5;
+    ctx.beginPath(); ctx.roundRect(tx,y,TW,TH,2.5); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle='#1e1e1e'; ctx.lineWidth=.4;
+    for(let i=0;i<=4;i++){const ty=y+i*TH/4;ctx.beginPath();ctx.moveTo(tx-2,ty);ctx.lineTo(tx+TW+2,ty);ctx.stroke();}
+    const by=y+(1-Math.max(0,Math.min(1,val)))*(TH-BH);
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.beginPath(); ctx.roundRect(x+1,by+1,BW,BH,2); ctx.fill();
+    const bg=ctx.createLinearGradient(x,by,x,by+BH);
+    bg.addColorStop(0,'#d8d4c8'); bg.addColorStop(.5,'#b4b0a6'); bg.addColorStop(1,'#8a8880');
+    ctx.fillStyle=bg; ctx.strokeStyle='#545450'; ctx.lineWidth=.5;
+    ctx.beginPath(); ctx.roundRect(x,by,BW,BH,2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle=col; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x+3,by+BH/2); ctx.lineTo(x+BW-3,by+BH/2); ctx.stroke();
+    ctx.fillStyle='#a0a098'; ctx.font='bold 7px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(lbl,x+BW/2,y+TH+2);
+  }
+  function led(x,y,on,col){
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle=on?col:'#1a1a1a'; ctx.strokeStyle='#505050'; ctx.lineWidth=.5;
+    if(on){ctx.shadowColor=col; ctx.shadowBlur=5;}
+    ctx.fill(); ctx.stroke(); ctx.shadowBlur=0;
+  }
+
+  // 行高さ計算
+  const r1h=42, r2h=40, r3h=58, r4h=38;
+  const fxH=78;
+
+  // ヘッダー
+  ctx.fillStyle='#505050'; ctx.fillRect(0,0,W,14);
+  ctx.fillStyle='#cc2200'; ctx.fillRect(0,12,W,2);
+  ctx.fillStyle=LABEL; ctx.font='bold 8px serif';
+  ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText('JN-106',6,7);
+  ctx.fillStyle='#555'; ctx.font='bold 5.5px monospace';
+  ctx.textAlign='right'; ctx.fillText('POLY SYNTHESIZER',W-4,7);
+
+  let y=16;
+
+  // ── ROW1: VOICE + DCO ──
+  const r1y=y, voiW=CW*.28, dcoW=CW*.72-2, dcoX=P+voiW+2;
+  jp(P,r1y,voiW,r1h,A_VOI); jl(P+2,r1y+4,voiW,'VOICE');
+  const vbw=(voiW-8)/2;
+  ['POLY','MONO'].forEach((m,i)=>jb(P+3+i*(vbw+2),r1y+12,vbw,11,s.mode===m,A_VOI,m,'#f0f0f0','#444'));
+  ['UNI','5TH'].forEach((m,i)=>jb(P+3+i*(vbw+2),r1y+26,vbw,11,s.mode===m,A_VOI,m,'#f0f0f0','#444'));
+  jp(dcoX,r1y,dcoW,r1h,A_DCO); jl(dcoX+2,r1y+4,dcoW,'DCO');
+  const RW=19;
+  ["16'","8'","4'","2'"].forEach((l,i)=>jb(dcoX+3+i*21,r1y+13,RW,10,s.dco.range===i,A_DCO,l,'#f0f0f0','#444'));
+  ['SAW','SQR','SUB','SSAW'].forEach((l,i)=>{
+    const on=(l==='SAW'&&s.osc1.wave==='SAW')||(l==='SQR'&&s.osc1.wave==='SQR')||
+             (l==='SUB'&&s.osc1.wave==='TRI')||(l==='SSAW'&&s.osc1.wave==='SSAW');
+    jb(dcoX+3+i*21,r1y+26,RW,10,on,A_DCO,l,'#f0f0f0','#444');
+  });
+  const dKx=dcoX+3+4*21+18;
+  [{l:'LFO',v:s.lfo.depth},{l:'ENV',v:s.filterEnv.amount},{l:'PW',v:s.osc1.pwm},
+   {l:'PORTA',v:s.porta},{l:'NOISE',v:s.noiseVol},{l:'DTUNE',v:s.osc1.detune}]
+    .forEach((k,i)=>kn(dKx+i*28+7,r1y+r1h-18,k.v,'#ee7700',k.l));
+  y+=r1h+GAP;
+
+  // ── ROW2: HPF + VCF ──
+  const r2y=y, hpfW=42, vcfX=P+hpfW+2, vcfW=CW-hpfW-2;
+  jp(P,r2y,hpfW,r2h,A_HPF); jl(P+2,r2y+4,hpfW,'HPF');
+  kn(P+hpfW/2,r2y+r2h-14,s.hpf,A_HPF,'FREQ',7);
+  jp(vcfX,r2y,vcfW,r2h,A_VCF); jl(vcfX+2,r2y+4,vcfW,'VCF');
+  ['12dB','24dB'].forEach((sl,i)=>jb(vcfX+3+i*26,r2y+13,24,10,s.filter.slope===sl,A_VCF,sl));
+  // VCFノブ: switchesの右から均等分散
+  const vcfSwEnd=vcfX+3+2*26+4;
+  [{l:'FREQ',v:s.filter.cutoff},{l:'RES',v:s.filter.res},{l:'ENV',v:s.filter.env},
+   {l:'LFO',v:s.lfo.depth*.6+.1},{l:'KEY',v:s.filter.vel}]
+    .forEach((k,i)=>kn(dKx+7+i*28,r2y+r2h-18,k.v,'#2288ee',k.l));
+  y+=r2h+GAP;
+
+  // ── ROW3: AMP ENV + FILTER ENV（縦スライダー）──
+  const r3y=y, halfC=Math.floor(CW/2)-1, TH=r3h-20;
+  jp(P,r3y,halfC,r3h,A_AMP); jl(P+2,r3y+4,halfC,'AMP ENV');
+  const aSlotW=halfC/5;
+  [{l:'A',v:s.amp.atk},{l:'D',v:s.amp.dec},{l:'S',v:s.amp.sus},{l:'R',v:s.amp.rel},{l:'VEL',v:s.amp.vel}]
+    .forEach((k,i)=>vs(P+Math.round(i*aSlotW+(aSlotW-14)/2),r3y+12,k.v,'#22cc55',k.l,TH));
+  jp(P+halfC+2,r3y,halfC,r3h,A_FEV); jl(P+halfC+4,r3y+4,halfC,'FILTER ENV');
+  const fSlotW=halfC/6;
+  [{l:'A',v:s.filterEnv.atk},{l:'D',v:s.filterEnv.dec},{l:'S',v:s.filterEnv.sus},
+   {l:'R',v:s.filterEnv.rel},{l:'AMT',v:s.filterEnv.amount},{l:'VEL',v:.5}]
+    .forEach((k,i)=>vs(P+halfC+2+Math.round(i*fSlotW+(fSlotW-14)/2),r3y+12,k.v,'#22aaaa',k.l,TH));
+  y+=r3h+GAP;
+
+  // ── ROW4: LFO + ARP ──
+  const r4y=y, lfoW=CW*.60, arpW=CW*.40-2;
+  jp(P,r4y,lfoW,r4h,A_LFO); jl(P+2,r4y+4,lfoW*.06,'LFO');
+  // LFO: wave上段、dest下段
+  const lbtnX=P+CW*.06;
+  const lbtnW=Math.floor((lfoW*0.52-4)/4);
+  ['SAW','TRI','SQR'].forEach((w2,i)=>jb(lbtnX+i*(lbtnW+2),r4y+12,lbtnW,11,s.lfo.wave===w2,A_LFO,w2,'#a0c8e0','#1a3a50'));
+  ['CUT','PIT','AMP','PWM'].forEach((d,i)=>jb(lbtnX+i*(lbtnW+2),r4y+26,lbtnW,11,s.lfo.dest===d,A_LFO,d,'#a0c8e0','#1a3a50'));
+  const lfx=lbtnX+4*(lbtnW+2)+6;
+  const lfKslot=(P+lfoW-lfx-4)/3;
+  [{l:'RATE',v:s.lfo.rate},{l:'DPT',v:s.lfo.depth},{l:'DLY',v:s.lfo.delay}]
+    .forEach((k,i)=>kn(lfx+Math.round(i*lfKslot+lfKslot/2),r4y+r4h-18,k.v,'#ee9900',k.l));
+  jp(P+lfoW+2,r4y,arpW,r4h,A_ARP); jl(P+lfoW+4,r4y+4,arpW*.08,'ARP');
+  led(P+lfoW+arpW-5,r4y+8,s.arp.on,'#9966cc');
+  ['UP','DWN','U/D','RND'].forEach((m,i)=>jb(P+lfoW+4+i*16,r4y+13,15,10,s.arp.mode===m,A_ARP,m,'#a0c8e0','#1a3a50'));
+  kn(P+lfoW+arpW-16,r4y+r4h-18,.5,'#9966cc','RATE',8);
+  y+=r4h+GAP;
+
+  // ── エフェクト行（元のカラフルスタイル）──
+  const r7y=y, r7h=fxH;
+  const choW=CW/4-1-15;          // CHORUS幅 -15
+  const restW=(CW-choW-4)/3;     // 残り3セクション均等
+  const eKY=r7y+r7h-23;
+  const dks=Math.floor((restW-6)/3);
+
+  function ep(x,ey,w,h,col){ctx.fillStyle='#252525';ctx.strokeStyle='#333';ctx.lineWidth=.6;ctx.beginPath();ctx.roundRect(x,ey,w,h,2);ctx.fill();ctx.stroke();ctx.fillStyle=col;ctx.fillRect(x,ey,w,1.5);}
+  function el(x,ey,w,col,t){ctx.fillStyle=col;ctx.font='bold 5.5px monospace';ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(t,x,ey);ctx.strokeStyle=col+'66';ctx.lineWidth=.5;const tw=ctx.measureText(t).width;ctx.beginPath();ctx.moveTo(x+tw+2,ey+3);ctx.lineTo(x+w,ey+3);ctx.stroke();}
+  function eb(x,ey,w,h,on,col,lbl){ctx.fillStyle=on?col:'#333';ctx.strokeStyle=on?col:'#444';ctx.lineWidth=.8;ctx.beginPath();ctx.roundRect(x,ey,w,h,2);ctx.fill();ctx.stroke();if(on){ctx.fillStyle='rgba(255,255,255,.15)';ctx.beginPath();ctx.roundRect(x+1,ey+1,w-2,h/2,1);ctx.fill();ctx.shadowColor=col;ctx.shadowBlur=4;}ctx.fillStyle=on?'#fff':'#c0bdb8';ctx.font='bold '+Math.min(w*.3,5.5)+'px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lbl,x+w/2,ey+h/2);ctx.shadowBlur=0;}
+
+  // ── CHORUS: Dimension C 4ボタン + 106 I/II ──
+  ep(P,r7y,choW,r7h,FX_C); el(P+2,r7y+2,choW,FX_C,'CHORUS');
+  led(P+choW-5,r7y+9,s.chorus.on,FX_C);
+  // 縦長シルバーボタン x4（均等配置・縦長方形・赤LED）
+  const cpw=Math.floor((choW-10)/6);
+  const cGap=Math.floor((choW-cpw*4)/5);
+  const cbH=22;
+  [1,2,3,4].forEach((n,i)=>{
+    const on=s.chorus.preset===n;
+    const bx=P+cGap+i*(cpw+cGap), by=r7y+22;
+    const sg=ctx.createLinearGradient(bx,by,bx,by+cbH);
+    sg.addColorStop(0,'#d8d4cc'); sg.addColorStop(.5,'#b0aca4'); sg.addColorStop(1,'#888480');
+    ctx.fillStyle=sg; ctx.strokeStyle='#666'; ctx.lineWidth=.7;
+    ctx.beginPath(); ctx.roundRect(bx,by,cpw,cbH,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.font='bold 5px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(n.toString(),bx+cpw/2,by+2);
+    ctx.beginPath(); ctx.arc(bx+cpw/2,by+cbH-6,2.5,0,Math.PI*2);
+    ctx.fillStyle=on?'#ff2200':'#550000';
+    if(on){ctx.shadowColor='#ff2200'; ctx.shadowBlur=5;}
+    ctx.fill(); ctx.shadowBlur=0;
+    ctx.strokeStyle='#331100'; ctx.lineWidth=.5; ctx.stroke();
+  });
+  // I / II → 常にオレンジ（選択時明るく、非選択時暗め）
+  const cw2=Math.floor((choW-10)/2);
+  [['I',s.chorus.on&&s.chorus.type==='CE-1'],['II',s.chorus.on&&s.chorus.type==='106']]
+    .forEach(([lbl,on],i)=>{
+      const bx=P+4+i*(cw2+2), by=r7y+57;
+      ctx.fillStyle=on?'#ff8800':'#ff6600';
+      ctx.strokeStyle=on?'#ffcc66':'#ff8833'; ctx.lineWidth=.8;
+      ctx.beginPath(); ctx.roundRect(bx,by,cw2,12,2); ctx.fill(); ctx.stroke();
+      if(on){ctx.fillStyle='rgba(255,255,255,.15)';ctx.beginPath();ctx.roundRect(bx+1,by+1,cw2-2,6,1);ctx.fill();ctx.shadowColor='#ff8800';ctx.shadowBlur=5;}
+      ctx.fillStyle='#fff'; ctx.font='bold 6px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(lbl,bx+cw2/2,by+6); ctx.shadowBlur=0;
+    });
+
+  // ── DELAY: タイプ + ノブ ──
+  const dx=P+choW+1;
+  ep(dx,r7y,restW,r7h,FX_D); el(dx+2,r7y+2,restW,FX_D,'DELAY');
+  led(dx+restW-5,r7y+9,s.delay.on,FX_D);
+  const dtw=Math.floor((restW-8)/3);
+  ['STR','TAPE','REV'].forEach((t,i)=>eb(dx+3+i*(dtw+2),r7y+11,dtw,10,s.delay.type[0]===t[0],FX_D,t));
+  [{l:'TIM',v:s.delay.time},{l:'FBK',v:s.delay.fback},{l:'MIX',v:s.delay.mix}]
+    .forEach((k,i)=>kn(dx+3+Math.floor(i*dks+dks/2),eKY,k.v,FX_D,k.l,8));
+
+  // ── REVERB: タイプ + ノブ ──
+  const rx=P+choW+restW+2;
+  ep(rx,r7y,restW,r7h,FX_R); el(rx+2,r7y+2,restW,FX_R,'REVERB');
+  led(rx+restW-5,r7y+9,s.reverb.on,FX_R);
+  const rtw=Math.floor((restW-6)/2);
+  ['SHM','REV'].forEach((t,i)=>eb(rx+3+i*(rtw+2),r7y+11,rtw,10,s.reverb.type[0]===t[0],FX_R,t));
+  [{l:'SZE',v:s.reverb.size},{l:'DMP',v:s.reverb.damp},{l:'MIX',v:s.reverb.mix}]
+    .forEach((k,i)=>kn(rx+3+Math.floor(i*dks+dks/2),eKY,k.v,FX_R,k.l,8));
+
+  // ── S.CHAIN: タイプ + ノブ ──
+  const sx=P+choW+restW*2+3;
+  ep(sx,r7y,restW,r7h,FX_S); el(sx+2,r7y+2,restW,FX_S,'S.CHAIN');
+  led(sx+restW-5,r7y+9,s.sidechain.on,FX_S);
+  const stw=Math.floor((restW-6)/2);
+  ['VOL','FLT'].forEach((t,i)=>eb(sx+3+i*(stw+2),r7y+11,stw,10,s.sidechain.target[0]===t[0],FX_S,t));
+  [{l:'DPT',v:s.sidechain.depth},{l:'ATK',v:s.sidechain.atk},{l:'REL',v:s.sidechain.rel}]
+    .forEach((k,i)=>kn(sx+3+Math.floor(i*dks+dks/2),eKY,k.v,FX_S,k.l,8));
+
+  ctx.strokeStyle='#707070'; ctx.lineWidth=1.5; ctx.strokeRect(1,1,W-2,H-2);
+  synthLayout={W,H,P,KS:7};
+}
+
+// FX state
+let fxChain = 0;
+let fxEditChain=0, fxEditSlot=null, fxEditPicker=false;
+let fxEditLayout=null;
+const fxSlots = Array.from({length:8},()=>[0,0,0,0]);
+const FX_PARAMS = {
+  1:['THRESH','RATIO','ATK','REL'],
+  2:['RATE','DEPTH','MIX','FBACK'],
+  3:['RATE','DEPTH','MIX','FBACK'],
+  4:['RATE','DEPTH','MIX','FBACK'],
+  5:['DRIVE','TONE','MIX'],
+  6:['FREQ','MIX'],
+  7:['BITS','RATE','MIX'],
+  8:['DRIVE','TONE','MIX'],
+  9:['TIME','FBACK','MIX'],
+};
+
+let mixPage = 0;
+const MIX_DRUM_GROUPS = [
+  ['BD','SD','T1','T2','HC'],
+  ['CH','OH','RM','CY','RD'],
+];
+const MIX_RIGHT = ['909','303/A','303/B','SYNTH','MASTER'];
+const CH_COLORS = {
+  'BD':'#d8d4ce','SD':'#d8d4ce','T1':'#d8d4ce','T2':'#d8d4ce','HC':'#d8d4ce',
+  'CH':'#c8c4be','OH':'#c8c4be','RM':'#c8c4be','CY':'#c8c4be','RD':'#c8c4be',
+  '909':'#d4c88a','303/A':'#c8c8c8','303/B':'#c0c0c0',
+  'SYNTH':'#c8d8ea','MASTER':'#1a2a4a',
+};
+const CH_TEXT = {'MASTER':'#aaccff','909':'#443300','SYNTH':'#223355'};
+
+function drawMixKnob(x,y,r,col,ct){
+  if(r<3)return;
+  const c=ct||ctx;
+  c.beginPath(); c.arc(x+.5,y+1,r,0,Math.PI*2);
+  c.fillStyle='rgba(0,0,0,.25)'; c.fill();
+  const g=c.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);
+  g.addColorStop(0,'#2e2e52'); g.addColorStop(.7,'#14142a'); g.addColorStop(1,'#0a0a1a');
+  c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fillStyle=g; c.fill();
+  c.strokeStyle='#333'; c.lineWidth=.8; c.stroke();
+  c.beginPath(); c.arc(x,y,r-1.5,-135*Math.PI/180,135*Math.PI/180);
+  c.strokeStyle='#0a0a1a'; c.lineWidth=1.5; c.stroke();
+  const ea=-135*Math.PI/180+.65*270*Math.PI/180;
+  c.beginPath(); c.arc(x,y,r-1.5,-135*Math.PI/180,ea);
+  c.strokeStyle=col; c.lineWidth=1.5;
+  c.shadowColor=col; c.shadowBlur=3; c.stroke(); c.shadowBlur=0;
+  c.strokeStyle='#fff'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(x,y);
+  c.lineTo(x+Math.cos(ea)*(r-2.5),y+Math.sin(ea)*(r-2.5)); c.stroke();
+}
+
+function drawMixSeq(W,H){
+  const B=2;
+  ctx.fillStyle='#b8b4a8'; ctx.fillRect(0,0,W,H);
+
+  const iX=B, iY=B, iW=W-B*2, iH=H-B*2;
+  const leftGroup=MIX_DRUM_GROUPS[mixPage]||MIX_DRUM_GROUPS[0];
+  const allParts=[...leftGroup,...MIX_RIGHT];
+  const N=allParts.length, CW=iW/N;
+
+  const partColors={'BD':'#ff8800','SD':'#ff8800','T1':'#ff8800','T2':'#ff8800',
+    'HC':'#ff8800','CH':'#ff8800','OH':'#ff8800','RM':'#ff8800','CY':'#ff8800','RD':'#ff8800',
+    '909':'#ff8800','303/A':'#cc0033','303/B':'#8800cc','SYNTH':'#2288dd','MASTER':'#dd2222'};
+  const bgColors={'909':'#d4c88a','303/A':'#c8c8c8','303/B':'#c0c0c0','SYNTH':'#c8d8ea','MASTER':'#1a2a4a'};
+
+  // Heights
+  const nameH=16, muteH=14, soloH=12, btnH=11, fxGap=3;
+  const trimR=Math.min(CW*.26,8), revR=Math.min(CW*.26,8), panR=Math.min(CW*.3,10);
+  const knobSec=trimR*2+7+revR*2+7+revR*2+7+panR*2+6;
+  const btnSec=btnH+4;
+  const fixed=nameH+knobSec+btnSec+soloH+2+muteH+2;
+  const faderH=Math.min(iH-fixed-4, iH*0.28);
+
+  allParts.forEach((p,i)=>{
+    if(!p)return;
+    const x=iX+i*CW, cw=CW-1, cx2=x+cw/2;
+    const isMaster=p==='MASTER';
+    ctx.fillStyle=bgColors[p]||'#d0ccc0';
+    ctx.fillRect(x,iY,cw,iH);
+    ctx.strokeStyle='#aaa'; ctx.lineWidth=.5; ctx.strokeRect(x,iY,cw,iH);
+
+    let y=iY;
+
+    // Part name
+    ctx.fillStyle=partColors[p]||'#ff8800';
+    ctx.beginPath(); ctx.roundRect(x+1,y+1,cw-2,nameH-2,2); ctx.fill();
+    ctx.font='bold '+Math.min(cw*.42,9)+'px monospace';
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(p,cx2,y+nameH/2);
+    y+=nameH+1;
+
+    // TRIM
+    if(!isMaster){
+    drawMixKnob(cx2,y+trimR,trimR,'#ff8800');
+    ctx.fillStyle='#333'; ctx.font='bold '+Math.min(cw*.28,6)+'px monospace';
+    ctx.textBaseline='top'; ctx.fillText('TRIM',cx2,y+trimR*2+1);
+    }
+    y+=trimR*2+10;
+
+    // REV1
+    if(!isMaster){
+    drawMixKnob(cx2,y+revR,revR,'#6699ff');
+    ctx.fillStyle='#333'; ctx.font='bold '+Math.min(cw*.26,6)+'px monospace';
+    ctx.textBaseline='top'; ctx.fillText('REV1',cx2,y+revR*2+1);
+    }
+    y+=revR*2+10;
+
+    // REV2
+    if(!isMaster){
+    drawMixKnob(cx2,y+revR,revR,'#55cc88');
+    ctx.fillStyle='#333'; ctx.font='bold '+Math.min(cw*.26,6)+'px monospace';
+    ctx.textBaseline='top'; ctx.fillText('REV2',cx2,y+revR*2+1);
+    }
+    y+=revR*2+10;
+
+    // FX
+    ctx.fillStyle='#0a0a00'; ctx.strokeStyle='#ddaa00'; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(x+2,y,cw-4,btnH,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#ffee66'; ctx.font='bold '+Math.min(cw*.3,7)+'px monospace';
+    ctx.textBaseline='middle'; ctx.fillText('FX▾',cx2,y+btnH/2);
+    y+=btnH+4;
+
+    // PAN
+    drawMixKnob(cx2,y+panR,panR,'#ffcc44');
+    y+=panR*2+8;
+
+    // SOLO
+    if(!isMaster){
+    const sG=ctx.createLinearGradient(x,y,x,y+soloH);
+    sG.addColorStop(0,'#aaeebb'); sG.addColorStop(1,'#55bb77');
+    ctx.fillStyle=sG; ctx.strokeStyle='#339955'; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(x+2,y,cw-4,soloH,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#002211'; ctx.font='bold '+Math.min(cw*.32,7)+'px monospace';
+    ctx.textBaseline='middle'; ctx.fillText('SOLO',cx2,y+soloH/2);
+    }
+    y+=soloH+2;
+
+    // Fader + LED meter + value window - calculated from bottom up, no gaps
+    y+=15-7; // push fader start down (shorter top)
+    const fv=.68+(i*11+mixPage*37)%25/100;
+    const valH=10, valGap=2;
+    const muteTopY=iY+iH-muteH-7;
+    const valBotY=muteTopY-valGap;
+    const valTopY=valBotY-valH;
+    const faderBotY=valTopY-valGap;
+    const actFaderH=Math.max(faderBotY-y,15);
+    const ftX=cx2, mW=5, mX=ftX-2-2-mW;
+    // LED meter 70% height, bottom aligned with fader
+    const meterH=Math.round(actFaderH*0.8);
+    const segH=Math.max(Math.floor(meterH/12),2),mH=segH*12;
+    const mTop=faderBotY-mH;
+    for(let s=0;s<12;s++){
+      const sy=mTop+(11-s)*segH;
+      const on=s<Math.round(fv*12);
+      if(!on) continue;
+      ctx.fillStyle=s>=10?'#ee2200':s>=8?'#dddd00':'#00ee44';
+      ctx.fillRect(mX,sy,mW,segH-1);
+    }
+    // Fader
+    ctx.fillStyle='#222'; ctx.fillRect(ftX-2,y,4,actFaderH);
+    const ty=y+actFaderH*(1-fv);
+    const tW=11, tH=24;
+    if(!isMaster){
+      // ノッチ左右
+      ctx.fillStyle='#3a3938';
+      ctx.fillRect(ftX-tW/2-2,ty-2,2,4);
+      ctx.fillRect(ftX+tW/2,ty-2,2,4);
+      // 駒を上から順にピクセルデータ通りに描画
+      const bands=[
+        {h:5, c:'#42413f'},  // 上部ダーク
+        {h:2, c:'#bbbab8'},  // 明るい線
+        {h:4, c:'#6c6b69'},  // 中間グレー
+        {h:4, c:'#929292'},  // やや明るい
+        {h:1, c:'#3b3b3b'},  // 暗い線
+        {h:1, c:'#dfdfdf'},  // 白線
+        {h:6, c:'#cccbc9'},  // シルバー
+        {h:4, c:'#f0efed'},  // 明るいシルバー
+        {h:2, c:'#797977'},  // 暗め
+      ];
+      let by=ty-tH/2;
+      bands.forEach(b=>{
+        ctx.fillStyle=b.c;
+        ctx.fillRect(ftX-tW/2,by,tW,b.h);
+        by+=b.h;
+      });
+      // 枠線
+      ctx.strokeStyle='#333'; ctx.lineWidth=.8;
+      ctx.beginPath(); ctx.roundRect(ftX-tW/2,ty-tH/2,tW,tH,1); ctx.stroke();
+    } else {
+      // ノッチ左右
+      ctx.fillStyle='#3a0000';
+      ctx.fillRect(ftX-tW/2-2,ty-2,2,4);
+      ctx.fillRect(ftX+tW/2,ty-2,2,4);
+      const bands=[
+        {h:5, c:'#4a1010'},
+        {h:2, c:'#cc6666'},
+        {h:4, c:'#8b3030'},
+        {h:4, c:'#aa4444'},
+        {h:1, c:'#551111'},
+        {h:1, c:'#ff8888'},
+        {h:6, c:'#cc5555'},
+        {h:4, c:'#ff9999'},
+        {h:2, c:'#882222'},
+      ];
+      let by=ty-tH/2;
+      bands.forEach(b=>{
+        ctx.fillStyle=b.c;
+        ctx.fillRect(ftX-tW/2,by,tW,b.h);
+        by+=b.h;
+      });
+      ctx.strokeStyle='#550000'; ctx.lineWidth=.8;
+      ctx.beginPath(); ctx.roundRect(ftX-tW/2,ty-tH/2,tW,tH,1); ctx.stroke();
+    }
+    // Value window directly above MUTE
+    ctx.fillStyle='#001133'; ctx.strokeStyle='#334'; ctx.lineWidth=.5;
+    ctx.beginPath(); ctx.roundRect(x+2,valTopY,cw-4,valH,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#0088ff'; ctx.font='bold '+Math.min(cw*.38,7)+'px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(Math.round(fv*100),cx2,valTopY+valH/2);
+    // MUTE pinned to bottom
+    if(!isMaster){
+    y=muteTopY;
+    const mG=ctx.createLinearGradient(x,y,x,y+muteH);
+    mG.addColorStop(0,'#ffd8aa'); mG.addColorStop(1,'#ffaa44');
+    ctx.fillStyle=mG; ctx.strokeStyle='#cc6622'; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(x+2,y,cw-4,muteH,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#441100'; ctx.font='bold '+Math.min(cw*.34,8)+'px monospace';
+    ctx.textBaseline='middle'; ctx.fillText('MUTE',cx2,y+muteH/2);
+    }
+  });
+
+  // Divider
+  const divX=iX+5*CW;
+  ctx.strokeStyle='#555'; ctx.lineWidth=2;
+  ctx.setLineDash([3,2]);
+  ctx.beginPath(); ctx.moveTo(divX,iY); ctx.lineTo(divX,iY+iH); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Green border drawn last
+  ctx.strokeStyle='#00ee44'; ctx.lineWidth=B*2+1;
+  ctx.strokeRect(B,B,W-B*2,H-B*2);
+}
+
+function drawMixEdit(W,H){ drawMixSeq(W,H); }
+
+function mixCycle(el){
+  document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  currentSub='mix';
+  mixPage=(mixPage+1)%MIX_DRUM_GROUPS.length;
+  drawCanvas();
+}
+
+// ── エフェクトチェーンデータ ──
+const FX_DEFS=[
+  {nm:'MULTI FILTER',c:'#00d4ff',params:[{n:'CUTOFF',v:.6},{n:'RES',v:.3},{n:'ENV',v:.4},{n:'KEY',v:.5}]},
+  {nm:'CHORUS',      c:'#00ff88',params:[{n:'RATE',v:.4},{n:'DEPTH',v:.5},{n:'MIX',v:.4}]},
+  {nm:'FLANGER',     c:'#ff8800',params:[{n:'RATE',v:.3},{n:'DEPTH',v:.6},{n:'FDBK',v:.4},{n:'MIX',v:.5}]},
+  {nm:'PHASER',      c:'#aa33ff',params:[{n:'RATE',v:.4},{n:'DEPTH',v:.5},{n:'STGS',v:.6},{n:'MIX',v:.4}]},
+  {nm:'COMP',        c:'#ffdd00',params:[{n:'THR',v:.6},{n:'RATIO',v:.4},{n:'ATK',v:.2},{n:'REL',v:.5}]},
+  {nm:'SATURATOR',   c:'#ff6644',params:[{n:'DRIVE',v:.4},{n:'TONE',v:.5},{n:'MIX',v:.5}]},
+  {nm:'RING MOD',    c:'#ff2d78',params:[{n:'FREQ',v:.4},{n:'MIX',v:.5}]},
+  {nm:'LOFI',        c:'#66ffee',params:[{n:'BITS',v:.5},{n:'RATE',v:.4},{n:'MIX',v:.5}]},
+  {nm:'REVERB 1',    c:'#00ff88',params:[{n:'SIZE',v:.6},{n:'DAMP',v:.4},{n:'MIX',v:.5},{n:'PRE',v:.2}]},
+  {nm:'REVERB 2',    c:'#88aaff',params:[{n:'SIZE',v:.7},{n:'DAMP',v:.3},{n:'MIX',v:.4},{n:'PRE',v:.3}]},
+];
+const fxChains=Array.from({length:8},()=>Array.from({length:4},()=>null));
+let fxChainSel=0,fxSlotSel=null,fxPickerActive=false;
+let fxSeqLayout=null;
+
+function drawFXSeq(W,H){
+  ctx.fillStyle='#0d0d1e'; ctx.fillRect(0,0,W,H);
+  const tabH=16,slotH=52,pickerH=fxPickerActive?96:0;
+  const paramY=tabH+slotH, paramH=H-tabH-slotH-pickerH;
+
+  // タブ CH1〜8
+  const tw=W/8;
+  for(let i=0;i<8;i++){
+    const tx=i*tw, act=i===fxChainSel;
+    const has=fxChains[i].some(s=>s);
+    ctx.fillStyle=act?'#00d4ff33':has?'#ffffff12':'#0a0a1a';
+    ctx.fillRect(tx,0,tw-1,tabH);
+    ctx.strokeStyle=act?'#00d4ff':has?'#445':'#334'; ctx.lineWidth=act?1.5:.8;
+    ctx.strokeRect(tx,0,tw-1,tabH);
+    ctx.fillStyle=act?'#00d4ff':has?'#88aacc':'#445';
+    ctx.font=`bold ${Math.min(tw*.26,8)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('CH'+(i+1),tx+tw/2,tabH/2);
+  }
+
+  // スロット4つ
+  const sw=(W-6)/4;
+  for(let s=0;s<4;s++){
+    const sx=3+s*(sw+.5), sy=tabH+4, sw2=sw-2, sh2=slotH-8;
+    const slot=fxChains[fxChainSel][s], sel=fxSlotSel===s;
+    if(slot){
+      const fx=FX_DEFS[slot.fxIdx];
+      ctx.fillStyle=slot.on?fx.c+'33':'#161626'; ctx.strokeStyle=sel?'#ffffff':fx.c; ctx.lineWidth=sel?2:1.2;
+      ctx.beginPath(); ctx.roundRect(sx,sy,sw2,sh2,3); ctx.fill(); ctx.stroke();
+      // LED
+      ctx.beginPath(); ctx.arc(sx+8,sy+8,3.5,0,Math.PI*2);
+      ctx.fillStyle=slot.on?fx.c:'#333'; ctx.shadowColor=slot.on?fx.c:'none'; ctx.shadowBlur=slot.on?5:0;
+      ctx.fill(); ctx.shadowBlur=0;
+      // 名前
+      ctx.fillStyle=fx.c; ctx.font=`bold ${Math.min(sw*.17,7)}px monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      const label=fx.nm.length>9?fx.nm.slice(0,8)+'…':fx.nm;
+      ctx.fillText(label,sx+sw2/2,sy+5);
+      ctx.fillStyle='#667'; ctx.font='5px monospace';
+      ctx.fillText(fx.params.length+'p',sx+sw2/2,sy+sh2-9);
+    } else {
+      ctx.fillStyle='#0e0e1e'; ctx.strokeStyle=sel?'#00d4ff':'#445'; ctx.lineWidth=sel?2:1;
+      ctx.beginPath(); ctx.roundRect(sx,sy,sw2,sh2,3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=sel?'#00d4ff':'#445'; ctx.font='bold 16px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('+',sx+sw2/2,sy+sh2/2);
+    }
+    // 矢印
+    if(s<3){ ctx.fillStyle='#445'; ctx.font='8px monospace'; ctx.textAlign='left'; ctx.fillText('▶',sx+sw-3,tabH+slotH/2); }
+  }
+
+  // パラメーターエリア
+  ctx.fillStyle='#0c0c1c'; ctx.fillRect(0,paramY,W,paramH);
+  ctx.strokeStyle='#445566'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(0,paramY); ctx.lineTo(W,paramY); ctx.stroke();
+
+  if(fxSlotSel!==null){
+    const slot=fxChains[fxChainSel][fxSlotSel];
+    if(slot){
+      const fx=FX_DEFS[slot.fxIdx];
+      ctx.fillStyle=fx.c; ctx.font='bold 8px monospace';
+      ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.shadowColor=fx.c; ctx.shadowBlur=4;
+      ctx.fillText(fx.nm,6,paramY+4); ctx.shadowBlur=0;
+      ctx.fillStyle='#445'; ctx.font='6px monospace';
+      ctx.fillText('SLOT '+(fxSlotSel+1)+'  [ tap LED to ON/OFF ]',6,paramY+14);
+      // ノブ
+      const kn=fx.params.length, kr=Math.min((W-8)/kn-4,34);
+      for(let p=0;p<kn;p++){
+        const kx=4+(kr+6)*p+kr/2+4, ky=paramY+26+kr/2;
+        const val=slot.params[p];
+        ctx.beginPath(); ctx.arc(kx,ky,kr/2,0,Math.PI*2);
+        ctx.fillStyle='#1a1a3a'; ctx.fill(); ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.stroke();
+        const sa=Math.PI*.75, ea=sa+Math.PI*1.5*val;
+        ctx.beginPath(); ctx.arc(kx,ky,kr/2-3,sa,ea);
+        ctx.strokeStyle=fx.c; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.stroke();
+        ctx.fillStyle='#778'; ctx.font='5px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(fx.params[p].n,kx,ky+kr/2+2);
+        ctx.fillStyle=fx.c; ctx.font='bold 6px monospace';
+        ctx.fillText(Math.round(val*100),kx,ky+kr/2+8);
+      }
+    } else {
+      ctx.fillStyle='#223'; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('＋ タップしてエフェクトを追加',W/2,paramY+paramH/2);
+    }
+  } else {
+    ctx.fillStyle='#223'; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('スロットをタップして選択',W/2,paramY+paramH/2);
+  }
+
+  // ピッカー
+  if(fxPickerActive){
+    const py=H-pickerH;
+    ctx.fillStyle='#1a1a3a'; ctx.fillRect(0,py,W,pickerH);
+    ctx.strokeStyle='#00d4ff'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(0,py); ctx.lineTo(W,py); ctx.stroke();
+    ctx.fillStyle='#00d4ff88'; ctx.font='bold 7px monospace'; ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText('SELECT EFFECT',4,py+2);
+    const cols=5, bw2=(W-6)/cols, bh2=(pickerH-12)/2;
+    FX_DEFS.forEach((fx,i)=>{
+      const fc=i%cols, fr=Math.floor(i/cols);
+      const bx=3+fc*bw2, by=py+11+fr*bh2;
+      ctx.fillStyle=fx.c+'18'; ctx.strokeStyle=fx.c+'66'; ctx.lineWidth=.7;
+      ctx.beginPath(); ctx.roundRect(bx,by,bw2-2,bh2-2,2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=fx.c; ctx.font=`bold ${Math.min(bw2*.18,6)}px monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(fx.nm.length>8?fx.nm.slice(0,7)+'…':fx.nm,bx+bw2/2,by+bh2/2);
+    });
+  }
+
+  fxSeqLayout={W,H,tabH,slotH,sw,pickerH,paramY,paramH,pickerY:H-pickerH};
+}
+function drawFXEdit(W,H){
+  const chain=fxEditChain;
+  const CHAIN_H=22, B=3;
+  const efxNames=['---','COMP','CHORUS','FLANGER','PHASER','SAT','RING','LOFI','FUZZ','DELAY'];
+  const efxColors=['#555','#ff8800','#00d4ff','#cc44ff','#ff2d78','#ffdd00','#00ff88','#88aaff','#ff6644','#44ccff'];
+
+  ctx.fillStyle='#0d0d1e'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#ffdd00'; ctx.lineWidth=4; ctx.strokeRect(2,2,W-4,H-4);
+
+  // Chain tabs
+  const tabW=(W-B*2)/8;
+  for(let c=0;c<8;c++){
+    const tx=B+c*tabW, act=c===chain;
+    const has=fxSlots[c].some(s=>s>0);
+    ctx.fillStyle=act?'#ffdd00':has?'#2a2a4a':'#161626';
+    ctx.strokeStyle=act?'#ddbb00':has?'#6666aa':'#333355'; ctx.lineWidth=act?2:1;
+    ctx.beginPath(); ctx.roundRect(tx+1,B,tabW-2,CHAIN_H-2,3); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=act?'#000':has?'#aabbff':'#667';
+    ctx.font='bold 9px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('C'+(c+1),tx+tabW/2,B+CHAIN_H/2);
+  }
+
+  // 4 slots
+  const slotY=CHAIN_H+8, slotW=(W-B*2-12)/4, slotH=70;
+  for(let s=0;s<4;s++){
+    const sx=B+s*(slotW+4), sel=fxSlots[chain][s], col=efxColors[sel]||'#555';
+    const isSel=fxEditSlot===s;
+    ctx.fillStyle=sel>0?'#161628':'#0e0e22';
+    ctx.strokeStyle=isSel?'#fff':sel>0?col:'#334466'; ctx.lineWidth=isSel?2.5:sel>0?2:1;
+    ctx.beginPath(); ctx.roundRect(sx,slotY,slotW,slotH,5); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#556688'; ctx.font='bold 8px monospace';
+    ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillText('SLOT '+(s+1),sx+4,slotY+4);
+    ctx.fillStyle=sel>0?col:'#445566';
+    ctx.font='bold '+(sel>0?9:10)+'px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor=sel>0?col:'none'; ctx.shadowBlur=sel>0?4:0;
+    ctx.fillText(efxNames[sel]||'---',sx+slotW/2,slotY+28); ctx.shadowBlur=0;
+    if(sel===0){
+      ctx.fillStyle='#334466'; ctx.font='bold 16px monospace';
+      ctx.fillText('+',sx+slotW/2,slotY+52);
+    } else {
+      // X button bottom right
+      const xr=8, xx=sx+slotW-xr-3, xy=slotY+slotH-xr-3;
+      ctx.fillStyle='#2a0a0a'; ctx.strokeStyle='#aa2222'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(xx,xy,xr,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#ff4444'; ctx.font='bold 9px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('✕',xx,xy);
+    }
+    if(s<3){ ctx.fillStyle='#4466aa'; ctx.font='bold 12px monospace'; ctx.textAlign='center'; ctx.fillText('▶',sx+slotW+2,slotY+slotH/2); }
+  }
+
+  // picker or params
+  const midY=slotY+slotH+6;
+  if(fxEditPicker){
+    // effect picker grid
+    const pickerH=90, cols=5, bw=(W-B*2-8)/cols, bh=(pickerH-4)/2;
+    ctx.fillStyle='#111128'; ctx.strokeStyle='#00d4ff'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.roundRect(B,midY,W-B*2,pickerH,4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#00d4ff'; ctx.font='bold 8px monospace'; ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText('SELECT EFFECT',B+4,midY+2);
+    for(let e=1;e<=9;e++){
+      const fc=(e-1)%cols, fr=Math.floor((e-1)/cols);
+      const bx=B+4+fc*bw, by=midY+14+fr*bh;
+      ctx.fillStyle=efxColors[e]+'22'; ctx.strokeStyle=efxColors[e]+'88'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.roundRect(bx,by,bw-2,bh-2,3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=efxColors[e]; ctx.font='bold 8px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(efxNames[e],bx+(bw-2)/2,by+(bh-2)/2);
+    }
+    // --- (clear)
+    const clearX=B+4+4*bw, clearY=midY+14+bh;
+    ctx.fillStyle='#222'; ctx.strokeStyle='#555'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(clearX,clearY,bw-2,bh-2,3); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#888'; ctx.font='bold 10px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('---',clearX+(bw-2)/2,clearY+(bh-2)/2);
+    fxEditLayout={W,H,CHAIN_H,slotY,slotH,slotW,midY,pickerH,tabW,cols,bw,bh};
+  } else if(fxEditSlot!==null&&fxSlots[chain][fxEditSlot]>0){
+    // params
+    const sel=fxSlots[chain][fxEditSlot], col=efxColors[sel];
+    const params=FX_PARAMS[sel]||[];
+    const paramH=H-midY-92;
+    ctx.fillStyle='#0c0c1e'; ctx.strokeStyle='#334'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(B,midY,W-B*2,paramH,4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=col; ctx.font='bold 9px monospace';
+    ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.shadowColor=col; ctx.shadowBlur=5;
+    ctx.fillText('SLOT'+(fxEditSlot+1)+' — '+efxNames[sel],B+6,midY+4); ctx.shadowBlur=0;
+    const kr=Math.min((W-16)/params.length*.4,16);
+    params.forEach((p,pi)=>{
+      const kx=8+(W-16)/params.length*(pi+0.5), ky=midY+paramH/2+4;
+      const ea=-135*Math.PI/180+.5*270*Math.PI/180;
+      const g=ctx.createRadialGradient(kx-3,ky-3,1,kx,ky,kr);
+      g.addColorStop(0,'#3a3a6a'); g.addColorStop(1,'#111122');
+      ctx.beginPath(); ctx.arc(kx,ky,kr,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+      ctx.strokeStyle='#222244'; ctx.lineWidth=1; ctx.stroke();
+      ctx.beginPath(); ctx.arc(kx,ky,kr-2,-135*Math.PI/180,ea);
+      ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.lineCap='round';
+      ctx.shadowColor=col; ctx.shadowBlur=4; ctx.stroke(); ctx.shadowBlur=0;
+      ctx.fillStyle='#ccd'; ctx.font='bold 7px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(p,kx,ky+kr+3);
+    });
+    fxEditLayout={W,H,CHAIN_H,slotY,slotH,slotW,midY,tabW};
+  } else {
+    ctx.fillStyle='#446688'; ctx.font='8px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('スロットをタップ',W/2,midY+30);
+    fxEditLayout={W,H,CHAIN_H,slotY,slotH,slotW,midY,tabW};
+  }
+
+  // REV1/REV2
+  const revStartY=H-88;
+  ['REV1','REV2'].forEach((rv,ri)=>{
+    const ry=revStartY+ri*44, rc=ri===0?'#6699ff':'#44dd88';
+    ctx.fillStyle='#0e0e22'; ctx.strokeStyle=rc; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.roundRect(B,ry,W-B*2,40,4); ctx.fill(); ctx.stroke();
+    // IR/SCH
+    ['IR','SCH'].forEach((m,mi)=>{
+      ctx.fillStyle=mi===0?'#ffdd00':'#1a1a3a'; ctx.strokeStyle='#444466'; ctx.lineWidth=.8;
+      ctx.beginPath(); ctx.roundRect(B+5+mi*24,ry+4,22,12,2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=mi===0?'#000':'#778'; ctx.font='bold 7px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(m,B+5+mi*24+11,ry+10);
+    });
+    ctx.fillStyle=rc; ctx.font='bold 9px monospace';
+    ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.shadowColor=rc; ctx.shadowBlur=4;
+    ctx.fillText(rv,B+56,ry+20); ctx.shadowBlur=0;
+    ['SIZE','DECAY','GATE','VOL'].forEach((p,pi)=>{
+      const kr=10, kx=B+80+(W-B*2-85)*((pi+0.5)/4), ky=ry+20;
+      const ea=-135*Math.PI/180+.5*270*Math.PI/180;
+      const g=ctx.createRadialGradient(kx-3,ky-3,1,kx,ky,kr);
+      g.addColorStop(0,'#3a3a6a'); g.addColorStop(1,'#111122');
+      ctx.beginPath(); ctx.arc(kx,ky,kr,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+      ctx.strokeStyle='#222244'; ctx.lineWidth=1; ctx.stroke();
+      ctx.beginPath(); ctx.arc(kx,ky,kr-2,-135*Math.PI/180,ea);
+      ctx.strokeStyle=rc; ctx.lineWidth=2; ctx.lineCap='round';
+      ctx.shadowColor=rc; ctx.shadowBlur=3; ctx.stroke(); ctx.shadowBlur=0;
+      ctx.fillStyle='#ccd'; ctx.font='bold 7px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(p,kx,ky+kr+3);
+    });
+  });
+}
+
+function handleFXEditTap(rx,ry){
+  if(!fxEditLayout) return;
+  const {W,H,CHAIN_H,slotY,slotH,slotW,midY,pickerH,tabW,cols,bw,bh}=fxEditLayout;
+  const B=3;
+  // chain tabs
+  if(ry<CHAIN_H){
+    fxEditChain=Math.min(7,Math.floor((rx-B)/(tabW)));
+    fxEditSlot=null; fxEditPicker=false; drawCanvas(); return;
+  }
+  // slots
+  if(ry>=slotY&&ry<slotY+slotH){
+    const s=Math.min(3,Math.floor((rx-B)/((W-B*2)/4)));
+    const sx=B+s*(slotW+4);
+    // Check X button
+    const xr=8, xx=sx+slotW-xr-3, xy=slotY+slotH-xr-3;
+    if(fxSlots[fxEditChain][s]>0&&Math.hypot(rx-xx,ry-xy)<xr+2){
+      fxSlots[fxEditChain][s]=0;
+      if(fxEditSlot===s){fxEditSlot=null;}
+      fxEditPicker=false; drawCanvas(); return;
+    }
+    if(fxEditSlot===s&&fxSlots[fxEditChain][s]===0){
+      fxEditPicker=true;
+    } else {
+      fxEditSlot=s;
+      fxEditPicker=fxSlots[fxEditChain][s]===0;
+    }
+    drawCanvas(); return;
+  }
+  // picker
+  if(fxEditPicker&&pickerH&&ry>=midY&&ry<midY+pickerH){
+    const fc=Math.floor((rx-B-4)/bw), fr=Math.floor((ry-midY-14)/bh);
+    const idx=fr*cols+fc+1;
+    if(idx>=1&&idx<=9){ fxSlots[fxEditChain][fxEditSlot]=idx; }
+    else if(fc===4&&fr===1){ fxSlots[fxEditChain][fxEditSlot]=0; }
+    fxEditPicker=false; drawCanvas(); return;
+  }
+  fxEditPicker=false; drawCanvas();
+}
+
+function handleFXSeqTap(rx,ry){
+  if(!fxSeqLayout) return;
+  const {W,H,tabH,slotH,sw,pickerH,paramY,pickerY}=fxSeqLayout;
+  // ピッカー
+  if(fxPickerActive&&ry>=pickerY){
+    const cols=5,bw2=(W-6)/cols,bh2=(pickerH-12)/2;
+    const fc=Math.floor((rx-3)/bw2),fr=Math.floor((ry-pickerY-11)/bh2);
+    const idx=fr*cols+fc;
+    if(idx>=0&&idx<FX_DEFS.length){
+      const fx=FX_DEFS[idx];
+      fxChains[fxChainSel][fxSlotSel]={fxIdx:idx,on:true,params:fx.params.map(p=>p.v)};
+    }
+    fxPickerActive=false; redrawFXSeq(); return;
+  }
+  // タブ
+  if(ry<tabH){ fxChainSel=Math.min(7,Math.floor(rx/(W/8))); fxSlotSel=null; fxPickerActive=false; redrawFXSeq(); return; }
+  // スロット
+  if(ry>=tabH&&ry<tabH+slotH){
+    const s=Math.min(3,Math.floor((rx-3)/((W-6)/4)));
+    // LED タップ（ON/OFF）
+    const sx=3+s*((W-6)/4), sy=tabH+4;
+    if(rx>=sx&&rx<=sx+16&&ry>=sy&&ry<=sy+16&&fxChains[fxChainSel][s]){
+      fxChains[fxChainSel][s].on=!fxChains[fxChainSel][s].on;
+      redrawFXSeq(); return;
+    }
+    fxSlotSel=s;
+    fxPickerActive=!fxChains[fxChainSel][s];
+    redrawFXSeq(); return;
+  }
+  fxPickerActive=false; redrawFXSeq();
+}
+
+function redrawFXSeq(){
+  const c=document.getElementById('seqCanvas'); if(!c) return;
+  const dpr=window.devicePixelRatio||1;
+  const W=c.width/dpr, H=c.height/dpr;
+  ctx.save(); ctx.scale(dpr,dpr); drawFXSeq(W,H); ctx.restore();
+}
+
+function drawDrum(W,H){
+  const ROWS=10, COLS=16, LW=28;
+  const GW=W-LW, CW=GW/COLS, RH=(H-2)/ROWS;
+  const off=currentPage*16;
+
+  // bg グレー
+  ctx.fillStyle='#404040'; ctx.fillRect(0,0,W,H);
+
+  // row bg 交互グレー
+  for(let r=0;r<ROWS;r++){
+    ctx.fillStyle = r%2===0 ? '#464646' : '#3a3a3a';
+    ctx.fillRect(LW, r*RH, GW, RH);
+  }
+
+  // 1拍(4ステップ)ごとに背景色を変える
+  for(let beat=0;beat<4;beat++){
+    if(beat%2===1){
+      ctx.fillStyle='rgba(0,0,0,0.12)';
+      ctx.fillRect(LW+beat*4*CW, 0, CW*4, H);
+    }
+  }
+
+  // 縦グリッド線：16分音符ごと・1拍ごとに強調
+  for(let c=0;c<=COLS;c++){
+    const x=LW+c*CW;
+    if(c%4===0){
+      ctx.strokeStyle='#888888'; ctx.lineWidth=1.2;
+    } else {
+      ctx.strokeStyle='#555555'; ctx.lineWidth=0.5;
+    }
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  }
+
+  // 横グリッド線：パートごとに区切り
+  for(let r=0;r<=ROWS;r++){
+    ctx.strokeStyle= r%1===0 ? '#666666' : '#444444';
+    ctx.lineWidth= 0.8;
+    ctx.beginPath(); ctx.moveTo(LW,r*RH); ctx.lineTo(W,r*RH); ctx.stroke();
+  }
+
+  // play cursor highlight
+  if(playing && playStep>=0){
+    const cp=playStep%16, pp=Math.floor(playStep/16);
+    if(pp===currentPage){
+      ctx.fillStyle='rgba(255,255,255,.08)';
+      ctx.fillRect(LW+cp*CW, 0, CW, H);
+    }
+  }
+
+  // labels
+  ctx.textAlign='right'; ctx.textBaseline='middle';
+  DRUM_PARTS.forEach((name,r)=>{
+    ctx.font=`bold ${Math.min(RH*.55,10)}px monospace`;
+    ctx.fillStyle='#ff8800';
+    ctx.fillText(name, LW-3, r*RH+RH/2);
+  });
+
+  // notes（v===3を少し小さく）
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const v=drumGrid[r][off+c]; if(!v) continue;
+      const x=LW+c*CW, y=r*RH;
+      const cx2=x+CW/2, cy2=y+RH/2;
+      const rad=Math.min(CW,RH)*(v===1?.18:v===2?.27:.30);
+      ctx.beginPath(); ctx.arc(cx2,cy2,rad,0,Math.PI*2);
+      if(v===3){
+        ctx.fillStyle='#ffffff';
+        ctx.shadowColor='#ffffff'; ctx.shadowBlur=6;
+        ctx.fill(); ctx.shadowBlur=0;
+      } else if(v===2){
+        ctx.fillStyle='#cccccc'; ctx.fill();
+      } else {
+        ctx.fillStyle='#888888'; ctx.fill();
+      }
+      // フラムマーカー
+      if(flamGrid[r][off+c]){
+        ctx.fillStyle='#88ddff';
+        ctx.shadowColor='#88ddff'; ctx.shadowBlur=4;
+        ctx.beginPath();
+        ctx.moveTo(x+CW-5,y+1); ctx.lineTo(x+CW-1,y+1); ctx.lineTo(x+CW-1,y+5);
+        ctx.fill(); ctx.shadowBlur=0;
+      }
+    }
+  }
+
+  // label divider
+  ctx.strokeStyle='#888888'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(LW,0); ctx.lineTo(LW,H); ctx.stroke();
+  ctx.strokeStyle='#ff8800'; ctx.lineWidth=5; ctx.strokeRect(2.5,2.5,W-5,H-5);
+}
+
+
+function drawPianoRoll(W,H){
+  const bi     = currentSub==='bass-a'?0:1;
+  const COLS   = 16;
+  const NOCTS  = 2;
+  const NROWS  = NOCTS*12;
+  const KW     = 20;
+  const BTN_H  = 18;
+  const SCROLL_W = 8; // 横スクロールバー高さ
+  const SCROLL_H = 8; // 縦スクロールバー幅
+  const rollW  = W - KW - SCROLL_H;
+  const rollH  = H - BTN_H - SCROLL_W - 2;
+  const CW     = rollW / COLS;
+  const RH     = rollH / NROWS;
+  const baseN  = Math.max(0, (bassOct[bi]-1)*12 + bassScrollY[bi]);
+  const acol   = BASS_COLORS[currentSub];
+
+  ctx.fillStyle='#03030c'; ctx.fillRect(0,0,W,H);
+
+  // rows（A=赤み、B=紫み）
+  for(let n=0;n<NROWS;n++){
+    const ni=(baseN+NROWS-1-n)%12;
+    ctx.fillStyle = bi===0
+      ? (IS_BLACK[ni] ? '#120308' : '#1a0410')
+      : (IS_BLACK[ni] ? '#0e0418' : '#130320');
+    ctx.fillRect(KW, n*RH, rollW, RH);
+  }
+
+  // beat lines
+  for(let c=0;c<=COLS;c++){
+    const x=KW+c*CW;
+    ctx.strokeStyle=c%4===0?'#2a2a60':'#111130';
+    ctx.lineWidth=c%4===0?.8:.4;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,rollH); ctx.stroke();
+  }
+  for(let n=0;n<=NROWS;n++){
+    ctx.strokeStyle='#0d0d26'; ctx.lineWidth=.4;
+    ctx.beginPath(); ctx.moveTo(KW,n*RH); ctx.lineTo(KW+rollW,n*RH); ctx.stroke();
+  }
+
+  // piano keys
+  for(let n=0;n<NROWS;n++){
+    const ni=(baseN+NROWS-1-n)%12;
+    const isC = ni===0;
+    ctx.fillStyle = IS_BLACK[ni] ? '#0e0e22' : '#181836';
+    ctx.fillRect(0, n*RH, KW-1, RH);
+    if(isC){
+      const oct2=Math.floor((baseN+NROWS-1-n)/12)+1;
+      const cCol = bi===0 ? '#ff2d78' : '#aa33ff';
+      ctx.fillStyle=cCol+'88';
+      ctx.fillRect(0, n*RH, KW-1, RH);
+      ctx.fillStyle=cCol;
+      ctx.font=`bold ${Math.min(RH*.75,8)}px monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(`C${oct2}`, KW/2, n*RH+RH/2);
+    }
+  }
+  ctx.strokeStyle='#1e1e44'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(KW,0); ctx.lineTo(KW,rollH); ctx.stroke();
+
+  // notes（基本黄色、AC=赤、SL=緑）
+  bassNotes[bi].forEach((note,c)=>{
+    if(note===null) return;
+    const row=(baseN+NROWS-1)-note;
+    if(row<0||row>=NROWS) return;
+    const x=KW+c*CW+1, y=row*RH+1;
+    const nw=CW-2, nh=RH-1;
+    const isAC=bassAC[bi][c];
+    const isSL=bassSL[bi][c];
+    const ncol = isAC ? '#ff2d78' : isSL ? '#00ff88' : '#ffdd00';
+    ctx.fillStyle=ncol;
+    ctx.shadowColor=ncol; ctx.shadowBlur=8;
+    ctx.fillRect(x,y,nw,nh);
+    ctx.shadowBlur=0;
+    // AC/SL インジケーター
+    if(isAC){
+      ctx.fillStyle='#fff';
+      ctx.fillRect(x+nw-5,y+1,4,nh-2);
+    }
+    if(isSL){
+      ctx.strokeStyle='#fff'; ctx.lineWidth=1.2;
+      ctx.beginPath();
+      ctx.moveTo(x+nw-1, y+nh/2);
+      ctx.lineTo(x+nw+CW*.4, y-nh*.3);
+      ctx.stroke();
+    }
+  });
+
+  // 16ステップボタン（ロール幅に収める）
+  const BCW = rollW / COLS;
+  for(let s=0;s<COLS;s++){
+    const bx = KW + s*BCW + 1;
+    const by = rollH + 2;
+    const bw = BCW - 2;
+    const bh = BTN_H - 3;
+    const hasNote = bassNotes[bi][s] !== null;
+    const isAC2 = bassAC[bi][s];
+    const isSL2 = bassSL[bi][s];
+    const btnCol = isAC2 ? '#ff2d78' : isSL2 ? '#00cc55' : (hasNote ? '#ffffff' : '#1a2a1a');
+    const btnStroke = isAC2 ? '#ff6699' : isSL2 ? '#00ff88' : (hasNote ? '#aaaaaa' : '#2a3a2a');
+    ctx.fillStyle = btnCol;
+    ctx.strokeStyle = btnStroke;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,2); ctx.fill(); ctx.stroke();
+    if(bassAC[bi][s]){
+      ctx.fillStyle='#ffdd00';
+      ctx.beginPath(); ctx.arc(bx+bw-4,by+4,2,0,Math.PI*2); ctx.fill();
+    }
+    if(bassSL[bi][s]){
+      ctx.fillStyle='#00d4ff';
+      ctx.beginPath(); ctx.arc(bx+4,by+4,2,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  // 縦スクロールバー（右端）
+  const vsX = W - SCROLL_H;
+  const maxScrollY = 24; // 最大スクロール半音数
+  const vRatio = Math.max(0, Math.min(1, (-bassScrollY[bi]) / maxScrollY));
+  const vThumbH = rollH * 0.35;
+  const vThumbY = vRatio * (rollH - vThumbH);
+  ctx.fillStyle='#111130'; ctx.fillRect(vsX,0,SCROLL_H,rollH);
+  ctx.fillStyle='#3a3a6a';
+  ctx.beginPath(); ctx.roundRect(vsX+1,vThumbY,SCROLL_H-2,vThumbH,3); ctx.fill();
+
+  // 横スクロールバー（下端）
+  const hsY = H - SCROLL_W;
+  ctx.fillStyle='#111130'; ctx.fillRect(KW,hsY,rollW,SCROLL_W);
+  ctx.fillStyle='#3a3a6a';
+  ctx.beginPath(); ctx.roundRect(KW+2,hsY+1,rollW*0.6,SCROLL_W-2,3); ctx.fill();
+
+  // 枠（A=赤、B=紫、4辺）
+  const frameCol = bi===0 ? '#ff2d78' : '#aa33ff';
+  ctx.strokeStyle = frameCol;
+  ctx.lineWidth = 3;
+  ctx.shadowColor = frameCol; ctx.shadowBlur = 10;
+  ctx.strokeRect(1.5, 1.5, W-3, H-3);
+  ctx.strokeRect(1.5, 1.5, W-3, H-3);
+  ctx.shadowBlur = 0;
+}
+
+// ── DRUM EDIT (DR-1101 MIX 完全再現) ──────────────
+function drawDrumEdit(W,H){
+  const or='#ff8800';
+  // bg: DR-1101 mix-area color
+  ctx.fillStyle='#c0c0c0'; ctx.fillRect(0,0,W,H);
+
+  const cols=['PART','VOL','TUNE','DECAY','PAN','TONE','SAT','FX1','FX2','REV','PAD'];
+  const LW=32, PAD_W=44, KW=(W-LW-PAD_W)/(cols.length-2);
+  const RH=H/11;
+
+  // header row
+  ctx.fillStyle='#777';
+  ctx.fillRect(0,0,W,RH);
+  cols.forEach((c,i)=>{
+    const x = i===0?0 : i===cols.length-1 ? W-PAD_W : LW+(i-1)*KW;
+    const w = i===0?LW : i===cols.length-1 ? PAD_W : KW;
+    // FX1=yellow, FX2=blue, SAT=pink, REV=green header
+    if(c==='FX1') ctx.fillStyle='#ddaa00';
+    else if(c==='FX2') ctx.fillStyle='#1a70a8';
+    else if(c==='SAT') ctx.fillStyle='#cc2266';
+    else if(c==='REV') ctx.fillStyle='#227744';
+    else ctx.fillStyle='#777';
+    ctx.fillRect(x,0,w,RH);
+    ctx.strokeStyle='#555'; ctx.lineWidth=.8;
+    ctx.strokeRect(x,0,w,RH);
+    ctx.fillStyle='#fff'; ctx.font=`bold ${Math.min(RH*.55,9)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(c,x+w/2,RH/2);
+  });
+
+  // part rows
+  DRUM_PARTS.forEach((nm,r)=>{
+    const y=RH+r*(H-RH)/10, rh=(H-RH)/10;
+    // row bg: DR-1101 uses #cecece
+    ctx.fillStyle='#cecece'; ctx.fillRect(0,y,W,rh);
+    // borders
+    ctx.strokeStyle='#aaa'; ctx.lineWidth=.5;
+    ctx.strokeRect(0,y,W,rh);
+
+    // PART cell - dark bg
+    ctx.fillStyle='#333'; ctx.fillRect(0,y,LW,rh);
+    ctx.fillStyle='#ff8800'; ctx.font=`bold ${Math.min(rh*.55,9)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(nm, LW/2, y+rh/2);
+    ctx.strokeStyle='#444'; ctx.lineWidth=.5;
+    ctx.strokeRect(0,y,LW,rh);
+
+    // knob cells (VOL TUNE DECAY PAN TONE SAT FX1 FX2 REV)
+    for(let i=0;i<9;i++){
+      const cx2=LW+i*KW+KW/2, cy2=y+rh/2, kr=Math.min(rh*.38,KW*.35,8);
+      ctx.strokeStyle='#aaa'; ctx.lineWidth=.5;
+      ctx.strokeRect(LW+i*KW,y,KW,rh);
+      // FX1/FX2 cell tint
+      if(i===6){ ctx.fillStyle='rgba(255,200,0,.1)'; ctx.fillRect(LW+i*KW,y,KW,rh); }
+      if(i===7){ ctx.fillStyle='rgba(0,120,200,.1)'; ctx.fillRect(LW+i*KW,y,KW,rh); }
+      // knob body
+      const grad=ctx.createRadialGradient(cx2-kr*.25,cy2-kr*.25,kr*.1,cx2,cy2,kr);
+      grad.addColorStop(0,'#444'); grad.addColorStop(.7,'#1a1a1a'); grad.addColorStop(1,'#000');
+      ctx.beginPath(); ctx.arc(cx2,cy2,kr,0,Math.PI*2);
+      ctx.fillStyle=grad; ctx.fill();
+      ctx.strokeStyle='#555'; ctx.lineWidth=1; ctx.stroke();
+      // PAN=blue like DR-1101, others=orange
+      const ispan=i===3;
+      const indCol=ispan?'#00aaff':or;
+      const val=(r*11+i*17+31)%100/100;
+      const ang=-135*Math.PI/180+val*270*Math.PI/180;
+      // FX1=yellow, FX2=blue, SAT=pink, REV=green indicator
+      const kCol=i===6?'#ffdd00':i===7?'#3399ff':i===5?'#ff2d78':i===8?'#00ff88':indCol;
+      ctx.strokeStyle=kCol; ctx.lineWidth=1.5;
+      ctx.shadowColor=kCol; ctx.shadowBlur=2;
+      ctx.beginPath(); ctx.moveTo(cx2,cy2);
+      ctx.lineTo(cx2+Math.cos(ang)*kr*.7, cy2+Math.sin(ang)*kr*.7);
+      ctx.stroke(); ctx.shadowBlur=0;
+    }
+
+    // PAD cell: part color, full width
+    const px=W-PAD_W, pw=PAD_W, ph=rh;
+    ctx.fillStyle='#cecece'; ctx.fillRect(px,y,pw,ph);
+    ctx.strokeStyle='#aaa'; ctx.lineWidth=.5; ctx.strokeRect(px,y,pw,ph);
+    const bx=px+2, by=y+rh*.12, bw=pw*.6, bh=rh*.76;
+    const bg=ctx.createLinearGradient(bx,by,bx,by+bh);
+    bg.addColorStop(0,'#ffaa44'); bg.addColorStop(1,'#ff8800');
+    ctx.fillStyle=bg; ctx.strokeStyle=DRUM_COLORS[r]; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font=`bold ${Math.min(bh*.6,8)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(nm,bx+bw/2,by+bh/2);
+    // ■ stop button
+    const sx=bx+bw+2, sw=pw-bw-4, sh=bh;
+    const sg=ctx.createLinearGradient(sx,by,sx,by+sh);
+    sg.addColorStop(0,'#d8d8d8'); sg.addColorStop(1,'#b8b8b8');
+    ctx.fillStyle=sg; ctx.strokeStyle='#999'; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(sx,by,sw,sh,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#555'; ctx.font=`bold ${Math.min(sh*.6,8)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('■',sx+sw/2,by+sh/2);
+  });
+}
+
+// ── BASS EDIT (Silver rack, 3-section) ─────────────
+function drawBassEdit(W,H,bi){
+  const ac=bi===0?'#ff2d78':'#aa33ff';
+
+  // silver rack bg
+  const rg=ctx.createLinearGradient(0,0,0,H);
+  rg.addColorStop(0,'#d8d8d8'); rg.addColorStop(.5,'#c0c0c0'); rg.addColorStop(1,'#b8b8b8');
+  ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+
+  // screws
+  [[6,6],[W-6,6],[6,H-6],[W-6,H-6]].forEach(([x,y])=>{
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle='#999'; ctx.fill(); ctx.strokeStyle='#777'; ctx.lineWidth=.8; ctx.stroke();
+    ctx.strokeStyle='#666'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x-2.5,y); ctx.lineTo(x+2.5,y); ctx.stroke();
+  });
+
+  // section heights
+  const S1H=H*0.30, S2H=H*0.38, S3H=H*0.32;
+  const S1Y=0, S2Y=S1H, S3Y=S1H+S2H;
+
+  // divider lines
+  ctx.strokeStyle='#666'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(10,S2Y); ctx.lineTo(W-10,S2Y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(10,S3Y); ctx.lineTo(W-10,S3Y); ctx.stroke();
+
+  // ── SECTION 1: 2行グリッド ──────────────────────
+  const btnH=22, btnGapY=5, btnGapX=5;
+  const row1Y = S1Y + Math.max(4, (S1H - btnH*2 - btnGapY)*0.4);
+  const row2Y = row1Y + btnH + btnGapY + 10;
+
+  // 列幅
+  const cW=52;
+  const c1X=10, c2X=c1X+cW+btnGapX, c3X=c2X+cW+btnGapX;
+  const octX=c3X+cW+8, octW=58;
+  const lvR=14;
+  const lvKspc=(W-20)/6;
+  const lvX=10+5*lvKspc+lvKspc/2; // TUNEと同じX
+
+  // ── 列1: MUTE / SOLO ──
+  // MUTE
+  ctx.fillStyle='#ff8800'; ctx.strokeStyle='#cc5500'; ctx.lineWidth=1.2;
+  ctx.shadowColor='#ff8800'; ctx.shadowBlur=8;
+  ctx.beginPath(); ctx.roundRect(c1X,row1Y,cW,btnH,4); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#fff'; ctx.font='bold 10px monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('MUTE', c1X+cW/2, row1Y+btnH/2);
+
+  // SOLO
+  ctx.fillStyle='#33cc55'; ctx.strokeStyle='#118833'; ctx.lineWidth=1.2;
+  ctx.shadowColor='#33cc55'; ctx.shadowBlur=6;
+  ctx.beginPath(); ctx.roundRect(c1X,row2Y,cW,btnH,4); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#fff'; ctx.font='bold 10px monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('SOLO', c1X+cW/2, row2Y+btnH/2);
+
+  // ── 列2: SAW(上,active) / SQR(下) ──
+  // SAW
+  ctx.fillStyle='#ff8800'; ctx.strokeStyle='#cc5500'; ctx.lineWidth=1.2;
+  ctx.shadowColor='#ff8800'; ctx.shadowBlur=8;
+  ctx.beginPath(); ctx.roundRect(c2X,row1Y,cW,btnH,4); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#fff'; ctx.font='bold 10px monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('SAW', c2X+cW/2, row1Y+btnH/2);
+
+  // SQR
+  ctx.fillStyle='#c0c0c0'; ctx.strokeStyle='#999'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(c2X,row2Y,cW,btnH,4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#444'; ctx.font='bold 10px monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('SQR', c2X+cW/2, row2Y+btnH/2);
+
+  // ── 列3: SSAW(上) ──
+  ctx.fillStyle='#c0c0c0'; ctx.strokeStyle='#999'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(c3X,row1Y,cW,btnH,4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#444'; ctx.font='bold 10px monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('SSAW', c3X+cW/2, row1Y+btnH/2);
+
+  // ── OCT LCD (上) ──
+  ctx.fillStyle='#08080f'; ctx.strokeStyle='#3a3a6a'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(octX,row1Y,octW,btnH,3); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#444'; ctx.font='bold 6.5px monospace';
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText('OCT', octX+4, row1Y+2);
+  ctx.fillStyle='#ff8800'; ctx.font='bold 15px monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('3', octX+octW/2, row1Y+btnH/2);
+
+  // ── OCT ▲▼ (下) ──
+  const arW=(octW/2)-1;
+  ['▲','▼'].forEach((a,i)=>{
+    const ax=octX+i*(arW+1), ay=row2Y, aw=arW, ah=btnH;
+    ctx.fillStyle='#c0c0c0'; ctx.strokeStyle='#999'; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(ax,ay,aw,ah,3); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.font='bold 9px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(a, ax+aw/2, ay+ah/2);
+  });
+
+  // ── LEVEL ノブ (右端) ──
+  const lvCY=(row1Y+row2Y+btnH)/2;
+  drawKnobSilver(lvX, lvCY, lvR, .5, '#ff8800');
+  ctx.font='bold 8px monospace'; ctx.fillStyle='#333';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.fillText('LEVEL', lvX, lvCY+lvR+2);
+  ctx.fillStyle='#ff8800'; ctx.textBaseline='bottom';
+  ctx.fillText('64', lvX, lvCY-lvR-1);
+
+  // ── SECTION 2: KNOBS (変更なし) ──────────────────
+  const knobs=[
+    {nm:'CUTOFF',v:.6,c:'#ff4400'},{nm:'RES',v:.3,c:'#ff4400'},
+    {nm:'ENV',v:.7,c:'#ff4400'},{nm:'DECAY',v:.5,c:'#ff4400'},
+    {nm:'ACC',v:.4,c:'#ff6600'},{nm:'TUNE',v:.5,c:'#ff6600'}
+  ];
+  const ks=knobs.length, kspc=(W-20)/ks, kr=Math.min(kspc*.35,16);
+  knobs.forEach((k,i)=>{
+    const x=10+i*kspc+kspc/2, y=S2Y+S2H/2;
+    drawKnobSilver(x,y,kr,k.v,k.c);
+    ctx.font=`bold ${Math.min(kr*.55,8)}px monospace`; ctx.fillStyle='#222';
+    ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(k.nm,x,y+kr+3);
+    ctx.fillStyle=k.c; ctx.font=`bold ${Math.min(kr*.55,8)}px monospace`;
+    ctx.textBaseline='bottom'; ctx.fillText(Math.round(k.v*127),x,y-kr-2);
+  });
+
+  // ── SECTION 3: EFFECTS (各3ノブ) ─────────────────
+  const fxUW=(W-20)/3;
+
+  // DIST: DRIVE / TONE / LEVEL
+  drawFxBox3(10,          S3Y+4, fxUW-4, S3H-8, 'DIST',  '#ff6600',
+    [{nm:'DRIVE',v:.4},{nm:'TONE',v:.5},{nm:'LEVEL',v:.7}]);
+
+  // DELAY: D-TIME / REPEAT / D-LEVEL
+  drawFxBox3(10+fxUW,     S3Y+4, fxUW-4, S3H-8, 'DELAY', '#00aaff',
+    [{nm:'D-TIME',v:.3},{nm:'REPEAT',v:.4},{nm:'D-LEVEL',v:.6}]);
+
+  // MULTI FX: タイプ選択 + 3ノブ
+  const mfxX=10+fxUW*2, mfxY=S3Y+4, mfxBW=fxUW-4, mfxBH=S3H-8;
+  const mfxTypes=['CHO','FLG','PHS','REV','BITCR'];
+  const mfxSel=0; // CHORUS選択状態
+  // MFXタイプ別ノブ定義
+  const mfxKnobDefs=[
+    [{nm:'RATE',v:.4},{nm:'DEPTH',v:.6},{nm:'LEVEL',v:.7}],  // CHO
+    [{nm:'RATE',v:.5},{nm:'DEPTH',v:.5},{nm:'LEVEL',v:.7}],  // FLG
+    [{nm:'RATE',v:.3},{nm:'DEPTH',v:.7},{nm:'LEVEL',v:.6}],  // PHS
+    [{nm:'TIME',v:.6},{nm:'DAMP',v:.4},{nm:'LEVEL',v:.7}],   // REV
+    [{nm:'BITS',v:.5},{nm:'RATE',v:.4},{nm:'LEVEL',v:.6}],   // BITCR
+  ];
+  const mCol='#33cc99';
+  ctx.fillStyle='#1a1a2a'; ctx.strokeStyle=mCol; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(mfxX,mfxY,mfxBW,mfxBH,4); ctx.fill(); ctx.stroke();
+  // LED
+  ctx.beginPath(); ctx.arc(mfxX+7,mfxY+8,3,0,Math.PI*2);
+  ctx.fillStyle='#00ff88'; ctx.shadowColor='#00ff88'; ctx.shadowBlur=4; ctx.fill(); ctx.shadowBlur=0;
+  // タイトル
+  ctx.fillStyle=mCol; ctx.font='bold 7px monospace';
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText('MFX', mfxX+13, mfxY+8);
+  // タイプボタン
+  const sbW=(mfxBW-6)/mfxTypes.length-1;
+  mfxTypes.forEach((t,i)=>{
+    const sbX=mfxX+3+i*(sbW+1), sbY=mfxY+15, sbH=9;
+    const on=i===mfxSel;
+    ctx.fillStyle=on?mCol:'#252535';
+    ctx.strokeStyle=on?'#00ff88':'#3a3a5a'; ctx.lineWidth=.7;
+    ctx.beginPath(); ctx.roundRect(sbX,sbY,sbW,sbH,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=on?'#000':'#777';
+    ctx.font=`bold ${Math.min(sbW*.45,6)}px monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(t, sbX+sbW/2, sbY+sbH/2);
+  });
+  // 3ノブ
+  const mkr=Math.min(mfxBH*.16,9);
+  const mKnobs=mfxKnobDefs[mfxSel];
+  mKnobs.forEach((k,i)=>{
+    const kx=mfxX+mfxBW*(i+1)/4, ky=mfxY+mfxBH*.65;
+    drawKnobSilver(kx,ky,mkr,k.v,mCol);
+    ctx.font='bold 6px monospace'; ctx.fillStyle=mCol;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(k.nm, kx, ky+mkr+2);
+  });
+
+  drawBassEditFrame(W,H,bi);
+}
+
+// ── FX Box (3ノブ専用) ─────────────────────────────
+function drawFxBox3(bx,by,bw,bh,title,col,knobs){
+  // 背景
+  const bg=ctx.createLinearGradient(bx,by,bx,by+bh);
+  bg.addColorStop(0,'#929292'); bg.addColorStop(1,'#808080');
+  ctx.fillStyle=bg; ctx.strokeStyle='#666'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,4); ctx.fill(); ctx.stroke();
+  // LED
+  ctx.beginPath(); ctx.arc(bx+7,by+8,3,0,Math.PI*2);
+  ctx.fillStyle='#00ff44'; ctx.shadowColor='#00ff44'; ctx.shadowBlur=5; ctx.fill(); ctx.shadowBlur=0;
+  // タイトル
+  ctx.fillStyle='#1a1a1a'; ctx.font='bold 7px monospace';
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText(title, bx+13, by+8);
+  // 3ノブ 均等配置
+  const kspc=bw/4;
+  knobs.forEach((k,i)=>{
+    const kx=bx+kspc*(i+1), ky=by+bh*.65, kr=Math.min(kspc*.36,10);
+    drawKnobSilver(kx,ky,kr,k.v,col);
+    ctx.font='bold 6px monospace'; ctx.fillStyle='#1a1a1a';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(k.nm, kx, ky+kr+2);
+    ctx.fillStyle=col; ctx.font='bold 5.5px monospace';
+    ctx.textBaseline='bottom';
+    ctx.fillText(Math.round(k.v*127), kx, ky-kr-1);
+  });
+}
+
+function drawKnobSilver(x,y,r,v,col){
+  r = Math.max(r, 4);  // minimum radius guard
+  // shadow
+  ctx.beginPath(); ctx.arc(x+1,y+2,r,0,Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,.2)'; ctx.fill();
+  // body
+  const g=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);
+  g.addColorStop(0,'#555'); g.addColorStop(.6,'#222'); g.addColorStop(1,'#111');
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=g; ctx.fill(); ctx.strokeStyle='#444'; ctx.lineWidth=1; ctx.stroke();
+  // track
+  ctx.beginPath(); ctx.arc(x,y,r-2,-135*Math.PI/180,135*Math.PI/180);
+  ctx.strokeStyle='#333'; ctx.lineWidth=2.5; ctx.stroke();
+  // value
+  const ea=-135*Math.PI/180+v*270*Math.PI/180;
+  ctx.beginPath(); ctx.arc(x,y,r-2,-135*Math.PI/180,ea);
+  ctx.strokeStyle=col; ctx.lineWidth=2.5;
+  ctx.shadowColor=col; ctx.shadowBlur=4; ctx.stroke(); ctx.shadowBlur=0;
+  // indicator
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x,y);
+  ctx.lineTo(x+Math.cos(ea)*(r-3),y+Math.sin(ea)*(r-3)); ctx.stroke();
+}
+
+function drawFxBox(bx,by,bw,bh,title,col,knobs,btns){
+  ctx.fillStyle='#888'; ctx.strokeStyle='#666'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,4); ctx.fill(); ctx.stroke();
+  // LED
+  ctx.beginPath(); ctx.arc(bx+7,by+8,3,0,Math.PI*2);
+  ctx.fillStyle='#00ff44'; ctx.shadowColor='#00ff44'; ctx.shadowBlur=4; ctx.fill(); ctx.shadowBlur=0;
+  // title
+  ctx.fillStyle='#222'; ctx.font='bold 7px monospace';
+  ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(title,bx+13,by+8);
+  // knobs
+  const kspc=bw/(knobs.length+1);
+  knobs.forEach((k,i)=>{
+    const kx=bx+kspc*(i+.6), ky=by+bh*.52, kr=Math.min(kspc*.35,10);
+    drawKnobSilver(kx,ky,kr,k.v,col);
+    ctx.font='bold 6px monospace'; ctx.fillStyle='#222';
+    ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(k.nm,kx,ky+kr+1);
+  });
+  // buttons
+  btns.forEach((b,i)=>{
+    const tbx=bx+bw-38+i*19, tby=by+bh*.2, tbw=16, tbh=11;
+    ctx.fillStyle=b.on?col:'#ccc'; ctx.strokeStyle=b.on?col:'#999'; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.roundRect(tbx,tby,tbw,tbh,2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=b.on?'#fff':'#555'; ctx.font='bold 6px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(b.nm,tbx+tbw/2,tby+tbh/2);
+  });
+}
+
+function drawBassEditFrame(W,H,bi){
+  // ── 枠（A=赤、B=紫、4辺）──
+  const frameCol2 = bi===0 ? '#ff2d78' : '#aa33ff';
+  const fw3 = 3;
+  ctx.strokeStyle = frameCol2;
+  ctx.lineWidth = fw3;
+  ctx.shadowColor = frameCol2; ctx.shadowBlur = 12;
+  ctx.strokeRect(fw3/2, fw3/2, W-fw3, H-fw3);
+  ctx.strokeRect(fw3/2, fw3/2, W-fw3, H-fw3);
+  ctx.shadowBlur = 0;
+}
+function getCanvasPos(e){
+  const r=canvas.getBoundingClientRect();
+  return {x:e.clientX-r.left, y:e.clientY-r.top, w:r.width, h:r.height};
+}
+
+canvas.addEventListener('pointerdown', e=>{
+  e.preventDefault();
+  const {x,y,w,h}=getCanvasPos(e);
+  if(currentSub==='drum') handleDrumTap(x,y,w,h);
+  else if(currentSub==='drum-mix') handleDrumMixTap(x,y,w,h);
+  else if(currentSub==='mix'||currentSub==='mix-edit') handleMixNav(x,y,w,h);
+  else if(currentSub==='seqfx') handleFXSeqTap(x,y);
+  else if(currentSub==='seqfx-edit') handleFXEditTap(x,y);
+  else if(currentSub==='synth-mix') handleSynthTap(x,y,e);
+  else handleBassTap(x,y,w,h);
+});
+
+// SYNTHスクロール
+let synthSwipeStartY=0, synthSwipeScrollY=0, synthSwipeActive=false;
+canvas.addEventListener('pointerdown', e=>{
+  if(currentSub!=='synth-mix') return;
+  synthSwipeStartY=e.clientY; synthSwipeScrollY=synthScrollY; synthSwipeActive=true;
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', e=>{
+  if(!synthSwipeActive||currentSub!=='synth-mix') return;
+  const dy=synthSwipeStartY-e.clientY;
+  const r=canvas.getBoundingClientRect();
+  synthScrollY=Math.max(0,synthSwipeScrollY+dy);
+  const dpr=window.devicePixelRatio||1;
+  ctx.save(); ctx.scale(dpr,dpr); drawSynthEdit(r.width,r.height); ctx.restore();
+});
+canvas.addEventListener('pointerup', e=>{ synthSwipeActive=false; });
+
+function handleSynthTap(x,y,e){
+  const s=synthState;
+  const dpr=window.devicePixelRatio||1;
+  const r=canvas.getBoundingClientRect();
+  const W=r.width, H=r.height;
+  // ボタン類のタップは再描画
+  ctx.save(); ctx.scale(dpr,dpr); drawSynthEdit(W,H); ctx.restore();
+}
+
+let dragDraw=false, dragV=0;
+canvas.addEventListener('pointermove', e=>{
+  if(!dragDraw) return;
+  const {x,y,w,h}=getCanvasPos(e);
+  if(currentSub==='drum') handleDrumDrag(x,y,w,h);
+});
+// ベーススクロール（左端ピアノキー部分スワイプのみ）
+let bassSwipeStartY=0, bassSwipeBi=0, bassSwipeActive=false;
+canvas.addEventListener('pointerdown', e=>{
+  if(currentSub!=='bass-a'&&currentSub!=='bass-b') return;
+  const r=canvas.getBoundingClientRect();
+  const x=(e.clientX-r.left)*(canvas.width/(r.width*(window.devicePixelRatio||1)));
+  const KW=20;
+  if(x>KW) return; // 左端のみ
+  bassSwipeActive=true;
+  bassSwipeStartY=e.clientY;
+  bassSwipeBi=currentSub==='bass-a'?0:1;
+  e.stopPropagation();
+},{passive:true, capture:true});
+canvas.addEventListener('pointermove', e=>{
+  if(!bassSwipeActive) return;
+  const dy=bassSwipeStartY-e.clientY;
+  if(Math.abs(dy)>6){
+    bassScrollY[bassSwipeBi]=Math.max(-36,Math.min(12,bassScrollY[bassSwipeBi]-Math.sign(dy)*2));
+    bassSwipeStartY=e.clientY;
+    drawCanvas();
+  }
+},{passive:true, capture:true});
+canvas.addEventListener('pointerup', e=>{ bassSwipeActive=false; dragDraw=false; });
+
+function handleDrumMixTap(x,y,w,h){
+  const params=["VOL","TUNE","DECAY","PAN","TONE","SAT","REV"];
+  const LW=32,PAD_W=44,KW=(w-LW-PAD_W)/(params.length);
+  const RH=h/11;
+  if(y<RH) return;
+  const row=Math.floor((y-RH)/(h-RH)*10);
+  const col=Math.floor((x-LW)/KW);
+  if(row<0||row>=10||col<0||col>=7) return;
+  const partNm=DRUM_PARTS[row];
+  const paramNm=params[col];
+  const val=Math.round(((row*11+col*17+31)%100)/100*127);
+  showKnobDetail(partNm,paramNm,val,DRUM_COLORS[row]);
+}
+
+function showKnobDetail(part,param,val,col){
+  const kp=document.getElementById("kdPart"); if(kp){kp.textContent=part; kp.style.color=col;}
+  const kpm=document.getElementById("kdParam"); if(kpm) kpm.textContent=param;
+  const kv=document.getElementById("kdVal"); if(kv){kv.textContent=val; kv.style.color=col; kv.style.textShadow="0 0 6px "+col;}
+}
+
+function handleDrumTap(x,y,w,h){
+  const COLS=16,ROWS=10,LW=28;
+  const GW=w-LW, CW=GW/COLS, RH=(h-2)/ROWS;
+  if(x<LW) return;
+  const c=Math.floor((x-LW)/CW), r=Math.floor(y/RH);
+  if(c<0||c>=16||r<0||r>=10) return;
+  const step=currentPage*16+c;
+  const cur=drumGrid[r][step];
+  if(flamMode){
+    if(cur>0) flamGrid[r][step]=flamGrid[r][step]?0:1;
+  } else if(velMode){
+    drumGrid[r][step]=cur===0?2:cur===2?3:cur===3?1:2;
+    dragDraw=true; dragV=drumGrid[r][step];
+  } else {
+    drumGrid[r][step]=cur?0:3;
+    if(!cur) flamGrid[r][step]=0;
+    dragDraw=true; dragV=drumGrid[r][step];
+  }
+  drawCanvas();
+}
+function handleDrumDrag(x,y,w,h){
+  const COLS=16,ROWS=10,LW=28;
+  const GW=w-LW, CW=GW/COLS, RH=(h-2)/ROWS;
+  if(x<LW) return;
+  const c=Math.floor((x-LW)/CW), r=Math.floor(y/RH);
+  if(c<0||c>=16||r<0||r>=10) return;
+  const step=currentPage*16+c;
+  drumGrid[r][step]=dragV;
+  drawCanvas();
+}
+
+function handleBassTap(x,y,w,h){
+  const bi=currentSub==='bass-a'?0:1;
+  const COLS=16,NROWS=24,KW=20;
+  const BTN_H=18,SCROLL_W=8,SCROLL_H=8;
+  const rollW=w-KW-SCROLL_H;
+  const rollH=h-BTN_H-SCROLL_W-2;
+  const CW=rollW/COLS, RH=rollH/NROWS;
+
+  if(x<KW) return;
+
+  // 16ボタン領域タップ
+  if(y>rollH+2 && y<rollH+2+BTN_H){
+    const c=Math.floor((x-KW)/CW);
+    if(c<0||c>=16) return;
+    if(bassInputMode==='ac') bassAC[bi][c]=bassAC[bi][c]?0:1;
+    else if(bassInputMode==='sl') bassSL[bi][c]=bassSL[bi][c]?0:1;
+    else {
+      bassNotes[bi][c] = bassNotes[bi][c]!==null ? null : (bassOct[bi]-1)*12+12;
+    }
+    drawCanvas(); return;
+  }
+
+  // ピアノロール領域タップ
+  if(y>rollH) return;
+  const c=Math.floor((x-KW)/CW);
+  const row=Math.floor(y/RH);
+  if(c<0||c>=16||row<0||row>=NROWS) return;
+  const note=(bassOct[bi]-1)*12 + (NROWS-1-row);
+  if(bassInputMode==='ac'){
+    bassAC[bi][c]=bassAC[bi][c]?0:1;
+  } else if(bassInputMode==='sl'){
+    bassSL[bi][c]=bassSL[bi][c]?0:1;
+  } else {
+    if(bassNotes[bi][c]===note) bassNotes[bi][c]=null;
+    else bassNotes[bi][c]=note;
+  }
+  drawCanvas();
+}
+
+// ── Init ──────────────────────────────────────────
+window.addEventListener('load',()=>{
+  buildKnobs(drumKnobs);
+  buildPads();
+  buildStepBtns();
+
+  // demo pattern
+  const pat=[[0,4,8,12],[2,6,10,14],[0,8],[3,7,11,15]];
+  pat.forEach((steps,pi)=>{
+    steps.forEach(s=>{ drumGrid[pi<2?pi:pi][s]=3; });
+  });
+  drumGrid[0][0]=3; drumGrid[0][8]=3; drumGrid[1][4]=3; drumGrid[1][12]=3;
+  drumGrid[2][2]=3; drumGrid[2][10]=3;
+  [0,2,4,6,8,10,12,14].forEach(s=>drumGrid[3][s]=2);
+  [1,3,5,7,9,11,13,15].forEach(s=>drumGrid[4][s]=1);
+
+  drawCanvas();
+});
+window.addEventListener('resize', drawCanvas);
+
+// ══════════════════════════════════════════════════
+// MIX PAGE
+// ══════════════════════════════════════════════════
+let mixCurrentSub = 'drum';
+function mixSwitch(sub, el){
+  mixCurrentSub = sub;
+  document.querySelectorAll('#page-mix .sel-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  drawMix();
+}
+function drawMix(){
+  const canvas = document.getElementById('mixCanvas');
+  if(!canvas) return;
+  const parent = canvas.parentElement;
+  const dpr = window.devicePixelRatio||1;
+  const W = parent.clientWidth||1;
+  const H = parent.clientHeight||1;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  const c = canvas.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);
+  // 背景：BASS-A=ピンク、BASS-B=パープル、DRUM=ダーク
+  if(mixCurrentSub==='bass-a'){
+    const bg=c.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#1a0418'); bg.addColorStop(1,'#04040e');
+    c.fillStyle=bg;
+  } else if(mixCurrentSub==='bass-b'){
+    const bg=c.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#0e0418'); bg.addColorStop(1,'#04040e');
+    c.fillStyle=bg;
+  } else {
+    c.fillStyle='#04040e';
+  }
+  c.fillRect(0,0,W,H);
+
+  const parts = mixCurrentSub==='drum'
+    ? DRUM_PARTS
+    : ['CUT','RES','ENV','DEC','ACC','TUNE'];
+  const cols = mixCurrentSub==='drum'
+    ? DRUM_COLORS
+    : Array(6).fill(mixCurrentSub==='bass-a'?'#ff2d78':'#aa33ff');
+  // フェーダーfillのグラデーション定義
+  const faderGradTop = mixCurrentSub==='bass-a'?'#ff77aa'
+                     : mixCurrentSub==='bass-b'?'#cc88ff':'#00d4ff';
+  const faderGradBot = mixCurrentSub==='bass-a'?'#cc0055'
+                     : mixCurrentSub==='bass-b'?'#7700cc':'#0077bb';
+  const N = parts.length;
+  const PW = W/(N+1);
+  const FT=20, FB=H-30, FH=FB-FT;
+
+  // ヘッダー：BASS-A=ピンク帯、BASS-B=パープル帯
+  const hdrCol = mixCurrentSub==='bass-a'?'#1e0614'
+               : mixCurrentSub==='bass-b'?'#110614':'#0a0a1a';
+  c.fillStyle=hdrCol; c.fillRect(0,0,W,14);
+  // 帯の下線
+  if(mixCurrentSub!=='drum'){
+    const lineCol=mixCurrentSub==='bass-a'?'#ff2d7844':'#aa33ff44';
+    c.fillStyle=lineCol; c.fillRect(0,13,W,1);
+  }
+
+  parts.forEach((nm,i)=>{
+    const cx = PW*i + PW/2;
+    const col = cols[i]||'#888';
+    const vol = 0.6 + Math.sin(i*1.7)*0.2;
+
+    c.fillStyle=col; c.font='bold 6px monospace';
+    c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(nm, cx, 7);
+
+    // track
+    const fw=7, fx=cx-fw/2;
+    c.fillStyle='#0a0a1a'; c.strokeStyle='#1a1a3a'; c.lineWidth=.5;
+    c.beginPath(); c.roundRect(fx,FT,fw,FH,3); c.fill(); c.stroke();
+
+    // fill
+    const fh=FH*vol;
+    if(mixCurrentSub!=='drum'){
+      const fg=c.createLinearGradient(0,FT+FH-fh,0,FT+FH);
+      fg.addColorStop(0,faderGradTop+'99'); fg.addColorStop(1,faderGradBot+'99');
+      c.fillStyle=fg;
+    } else {
+      c.fillStyle=col+'66';
+    }
+    c.beginPath(); c.roundRect(fx,FT+FH-fh,fw,fh,2); c.fill();
+
+    // thumb
+    const ty=FT+FH-fh-4;
+    c.fillStyle='#ccc'; c.strokeStyle='#888'; c.lineWidth=.7;
+    c.beginPath(); c.roundRect(cx-8,ty,16,8,2); c.fill(); c.stroke();
+
+    // value
+    c.fillStyle=col; c.font='bold 6px monospace';
+    c.textBaseline='top'; c.fillText(Math.round(vol*127),cx,FB+3);
+
+    // MUTE button
+    c.fillStyle='#111128'; c.strokeStyle='#2a2a4a'; c.lineWidth=.5;
+    c.beginPath(); c.roundRect(cx-10,FB+14,20,10,2); c.fill(); c.stroke();
+    c.fillStyle='#555'; c.font='bold 5px monospace';
+    c.textBaseline='middle'; c.fillText('MUTE',cx,FB+19);
+  });
+
+  // MASTER strip
+  const mx = PW*N + PW/2;
+  c.fillStyle='#555'; c.font='bold 6px monospace'; c.textAlign='center'; c.textBaseline='middle';
+  c.fillText('MST',mx,7);
+  const mw=9, mfx=mx-mw/2;
+  c.fillStyle='#0a0a1a'; c.strokeStyle='#3a3a72'; c.lineWidth=.5;
+  c.beginPath(); c.roundRect(mfx,FT,mw,FH,3); c.fill(); c.stroke();
+  const mfh=FH*0.8;
+  c.fillStyle='rgba(0,212,255,0.35)';
+  c.beginPath(); c.roundRect(mfx,FT+FH-mfh,mw,mfh,2); c.fill();
+  c.fillStyle='#ccc'; c.strokeStyle='#888'; c.lineWidth=.7;
+  c.beginPath(); c.roundRect(mx-8,FT+FH-mfh-4,16,8,2); c.fill(); c.stroke();
+  c.fillStyle='#00d4ff'; c.font='bold 6px monospace';
+  c.textBaseline='top'; c.fillText('100',mx,FB+3);
+}
+
+// ══════════════════════════════════════════════════
+// FX PAGE
+// ══════════════════════════════════════════════════
+function fxTabSwitch(tab, el){
+  document.querySelectorAll('#page-fx .sel-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('fxPanelSend').style.display  = tab==='send'  ?'flex':'none';
+  document.getElementById('fxPanelMaster').style.display= tab==='master'?'flex':'none';
+}
+function fxToggleBody(id){
+  const body=document.getElementById(id+'Body');
+  if(body) body.style.display = body.style.display==='none'?'flex':'none';
+}
+function fxToggleOn(blkId){
+  const hd=document.querySelector('#'+blkId+' .fxblk-hd');
+  const led=hd.querySelector('.fxled');
+  const btn=hd.querySelector('.fxonbtn');
+  const ttl=hd.querySelector('.fxtitle');
+  const isOn=btn.classList.contains('on');
+  if(isOn){
+    led.style.background='#333'; led.style.boxShadow='none';
+    btn.classList.remove('on'); btn.textContent='OFF';
+    btn.style.color='#444'; btn.style.borderColor='#333';
+    if(ttl) ttl.style.color='#555';
+  } else {
+    const map={blkRev:'var(--green)',blkDly:'var(--cyan)',blkDist:'var(--orange)',blkComp:'var(--yellow)'};
+    const col=map[blkId]||'var(--cyan)';
+    led.style.background=col; led.style.boxShadow='0 0 5px '+col;
+    btn.classList.add('on'); btn.textContent='ON';
+    btn.style.color='var(--green)'; btn.style.borderColor='var(--green)';
+    if(ttl) ttl.style.color=col;
+  }
+}
+function buildFxKnobs(parentId, defs){
+  const parent=document.getElementById(parentId); if(!parent) return;
+  parent.innerHTML='';
+  defs.forEach(d=>{
+    let v=d.v;
+    const sz=d.sz||32;
+    const wrap=document.createElement('div'); wrap.className='fxmk';
+    const cv=document.createElement('canvas'); cv.width=sz; cv.height=sz;
+    cv.style.width=sz+'px'; cv.style.height=sz+'px';
+    function redraw(){
+      const ct=cv.getContext('2d'); ct.clearRect(0,0,sz,sz);
+      const r=sz*.375,cx=sz/2,cy=sz/2;
+      ct.beginPath(); ct.arc(cx,cy,r,-135*Math.PI/180,135*Math.PI/180);
+      ct.strokeStyle='#1a1a3a'; ct.lineWidth=sz*.075; ct.stroke();
+      const ea=-135*Math.PI/180+v*270*Math.PI/180;
+      ct.beginPath(); ct.arc(cx,cy,r,-135*Math.PI/180,ea);
+      ct.strokeStyle=d.c; ct.lineWidth=sz*.075; ct.shadowColor=d.c; ct.shadowBlur=3; ct.stroke(); ct.shadowBlur=0;
+      ct.strokeStyle='#fff'; ct.lineWidth=1.2;
+      ct.beginPath(); ct.moveTo(cx,cy); ct.lineTo(cx+Math.cos(ea)*(r-3),cy+Math.sin(ea)*(r-3)); ct.stroke();
+      valEl.textContent=getVal(v);
+    }
+    const lbl=document.createElement('div'); lbl.className='fxmk-lbl'; lbl.textContent=d.nm;
+    const valEl=document.createElement('div'); valEl.className='fxmk-val';
+    valEl.style.color=d.vc||d.c;
+    const ratios=['4:1','8:1','12:1','20:1','ALL'];
+    function getVal(v){ return d.ratioMode ? ratios[Math.min(Math.floor(v*4.99),4)] : Math.round(v*127); }
+    wrap.appendChild(cv); wrap.appendChild(lbl); wrap.appendChild(valEl);
+    // ON/OFF button (only for SEND FX and ISO knobs with no name)
+    if(d.nm===''||d.nm===undefined){
+      const onbtn=document.createElement('div');
+      onbtn.style.cssText='margin-top:12px;width:100%;height:12px;border-radius:3px;font-size:7px;font-weight:bold;text-align:center;line-height:12px;cursor:pointer;background:linear-gradient(180deg,#aaeebb,#55bb77);border:1px solid #339955;color:#002211;';
+      onbtn.textContent='ON';
+      onbtn.addEventListener('click',()=>{
+        const isOn=onbtn.textContent==='ON';
+        onbtn.textContent=isOn?'OFF':'ON';
+        onbtn.style.background=isOn?'linear-gradient(180deg,#555,#333)':'linear-gradient(180deg,#aaeebb,#55bb77)';
+        onbtn.style.color=isOn?'#888':'#002211';
+        onbtn.style.borderColor=isOn?'#444':'#339955';
+      });
+      wrap.appendChild(onbtn);
+    }
+    parent.appendChild(wrap);
+    redraw();
+    let drag=false,sy=0,sv=0;
+    cv.addEventListener('pointerdown',e=>{drag=true;sy=e.clientY;sv=v;cv.setPointerCapture(e.pointerId);});
+    cv.addEventListener('pointermove',e=>{if(!drag)return;v=Math.max(0,Math.min(1,sv-(e.clientY-sy)/80));redraw();});
+    cv.addEventListener('pointerup',()=>{drag=false;});
+  });
+}
+
+// ══════════════════════════════════════════════════
+// SETTING PAGE
+// ══════════════════════════════════════════════════
+function setStep(id, d, min, max){
+  const el=document.getElementById(id);
+  el.textContent=Math.max(min,Math.min(max,parseInt(el.textContent)+d));
+}
+function setStepArr(id, d, arr){
+  const el=document.getElementById(id);
+  const i=arr.indexOf(el.textContent);
+  el.textContent=arr[Math.max(0,Math.min(arr.length-1,i+d))];
+}
+function setTog(el, lblId){
+  const on=el.classList.toggle('on');
+  const lbl=document.getElementById(lblId);
+  if(lbl){lbl.textContent=on?'ON':'OFF'; lbl.className='settoglbl'+(on?' on':'');}
+}
+function mclkSel(v){
+  document.getElementById('mclkInt').className='bctl'+(v==='INT'?' active-ac':'');
+  document.getElementById('mclkExt').className='bctl'+(v==='EXT'?' active-ac':'');
+}
+function swSel(v){
+  ['A','B','C'].forEach(t=>{ document.getElementById('sw'+t).className='bctl'+(v===t?' active-sl':''); });
+}
+
+// ══════════════════════════════════════════════════
+// SONG PAGE
+// ══════════════════════════════════════════════════
+let songBars=16, songPlaying=false, songPlayHead=0, songLoopOn=false;
+const SONG_TRACKS=['DRUM','BASS-A','BASS-B','FX1','FX2'];
+const SONG_COLS=['#00d4ff','#ff2d78','#aa33ff','#ffdd00','#00ff88'];
+const songGrid=Array.from({length:5},()=>new Uint8Array(64));
+// demo fill
+[0,2,4,6,8,10,12,14].forEach(b=>{songGrid[0][b]=1;songGrid[1][b]=1;});
+[1,3,5,9].forEach(b=>{songGrid[2][b]=1;});
+songGrid[4][0]=1; songGrid[4][8]=1;
+
+function drawSong(){
+  const canvas=document.getElementById('songCanvas'); if(!canvas) return;
+  const parent=canvas.parentElement;
+  const dpr=window.devicePixelRatio||1;
+  const W=Math.max(parent.clientWidth||200,200);
+  const LBL=44, CH=26, TOTAL=SONG_TRACKS.length;
+  const CW=Math.max((W-LBL)/songBars,12);
+  const TW=LBL+CW*songBars, TH=TOTAL*CH+16;
+  canvas.width=Math.round(TW*dpr); canvas.height=Math.round(TH*dpr);
+  canvas.style.width=TW+'px'; canvas.style.height=TH+'px';
+  const c=canvas.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);
+  c.fillStyle='#04040e'; c.fillRect(0,0,TW,TH);
+
+  // bar header
+  c.fillStyle='#0a0a1a'; c.fillRect(LBL,0,TW-LBL,14);
+  for(let b=0;b<songBars;b++){
+    const x=LBL+b*CW;
+    c.strokeStyle=b%4===0?'#252550':'#111130'; c.lineWidth=b%4===0?.7:.3;
+    c.beginPath(); c.moveTo(x,0); c.lineTo(x,TH); c.stroke();
+    if(b%4===0){
+      c.fillStyle='#334'; c.font='bold 7px monospace'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText(b+1, x+CW/2, 7);
+    }
+  }
+
+  SONG_TRACKS.forEach((nm,t)=>{
+    const ty=14+t*CH;
+    const col=SONG_COLS[t];
+    c.fillStyle=t%2===0?'#070718':'#060614';
+    c.fillRect(0,ty,TW,CH);
+    c.strokeStyle='#0d0d28'; c.lineWidth=.4;
+    c.beginPath(); c.moveTo(0,ty+CH); c.lineTo(TW,ty+CH); c.stroke();
+
+    // label
+    c.fillStyle='#0d0d20'; c.fillRect(0,ty,LBL,CH);
+    c.strokeStyle='#181840'; c.lineWidth=.4;
+    c.beginPath(); c.moveTo(LBL,ty); c.lineTo(LBL,ty+CH); c.stroke();
+    c.fillStyle=col; c.font='bold 7px monospace'; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(nm, LBL/2, ty+CH/2);
+
+    for(let b=0;b<songBars;b++){
+      if(!songGrid[t][b]) continue;
+      const bx=LBL+b*CW+1;
+      c.fillStyle=col+'44';
+      c.beginPath(); c.roundRect(bx,ty+3,CW-2,CH-6,2); c.fill();
+      c.strokeStyle=col; c.lineWidth=.8;
+      c.beginPath(); c.roundRect(bx,ty+3,CW-2,CH-6,2); c.stroke();
+      c.fillStyle=col;
+      for(let s=0;s<3;s++){
+        const sx=bx+2+s*((CW-4)/3);
+        const sh=(CH-10)*(0.3+Math.abs(Math.sin(b*2.3+t*4.1+s))*0.6);
+        c.fillRect(sx, ty+CH/2-sh/2, (CW-6)/3, sh);
+      }
+    }
+    if(songPlaying){
+      const px=LBL+songPlayHead*CW;
+      c.fillStyle='rgba(255,255,255,.06)'; c.fillRect(px,ty,CW,CH);
+    }
+  });
+  if(songPlaying){
+    const px=LBL+songPlayHead*CW;
+    c.strokeStyle='rgba(255,255,255,.45)'; c.lineWidth=1.2;
+    c.beginPath(); c.moveTo(px,0); c.lineTo(px,TH); c.stroke();
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const sc=document.getElementById('songCanvas');
+  if(sc) sc.addEventListener('pointerdown',e=>{
+    const r=sc.getBoundingClientRect();
+    const dpr=window.devicePixelRatio||1;
+    const rx=(e.clientX-r.left)*(sc.width/(r.width*dpr));
+    const ry=(e.clientY-r.top)*(sc.height/(r.height*dpr));
+    const LBL=44,CH=26,CW=(sc.width/dpr-LBL)/songBars;
+    if(rx<LBL) return;
+    const b=Math.floor((rx-LBL)/CW);
+    const t=Math.floor((ry-14)/CH);
+    if(b<0||b>=songBars||t<0||t>=SONG_TRACKS.length) return;
+    songGrid[t][b]=songGrid[t][b]?0:1;
+    drawSong();
+  });
+});
+// ── SONG チェーン ────────────────────────────────
+let songChainRows=[];
+const SONG_BANKS=['A','B','C','D','E','F','G','H'];
+const SONG_BPM_MODES=['INPUT','GLOBAL','PTN'];
+
+function songAddRow(){
+  const n=songChainRows.length+1;
+  const row={id:n, bank:'A', ptn:1, rpt:1, comment:'', bpmMode:'INPUT', bpmVal:120};
+  songChainRows.push(row);
+  renderSongChain();
+}
+
+function songDeleteRow(idx){
+  songChainRows.splice(idx,1);
+  renderSongChain();
+}
+
+function renderSongChain(){
+  const chain=document.getElementById('songChain');
+  if(!chain) return;
+  chain.innerHTML='';
+  songChainRows.forEach((row,i)=>{
+    const rowEl=document.createElement('div');
+    rowEl.style.cssText='display:grid;grid-template-columns:16px 36px 36px 36px 1fr 60px 44px 22px;gap:1px;padding:1px 4px;background:'+(i%2===0?'#d8d8d8':'#cccccc')+';align-items:center;';
+    rowEl.innerHTML=`
+      <div style="font-size:8px;color:#555;text-align:center;font-weight:bold;">${i+1}</div>
+      <select style="font-size:8px;padding:1px;border:1px solid #bbb;border-radius:2px;background:#f4f4f4;" onchange="songChainRows[${i}].bank=this.value">
+        ${SONG_BANKS.map(b=>`<option${row.bank===b?' selected':''}>${b}</option>`).join('')}
+      </select>
+      <select style="font-size:8px;padding:1px;border:1px solid #bbb;border-radius:2px;background:#f4f4f4;" onchange="songChainRows[${i}].ptn=+this.value">
+        ${Array.from({length:16},(_,k)=>`<option${row.ptn===k+1?' selected':''}>${k+1}</option>`).join('')}
+      </select>
+      <select style="font-size:8px;padding:1px;border:1px solid #bbb;border-radius:2px;background:#f4f4f4;" onchange="songChainRows[${i}].rpt=+this.value">
+        ${Array.from({length:16},(_,k)=>`<option${row.rpt===k+1?' selected':''}>${k+1}</option>`).join('')}
+      </select>
+      <input type="text" placeholder="comment..." value="${row.comment}" style="font-size:8px;padding:1px 3px;border:1px solid #bbb;border-radius:2px;background:#fafafa;width:100%;box-sizing:border-box;" oninput="songChainRows[${i}].comment=this.value">
+      <select style="font-size:8px;padding:1px;border:1px solid #bbb;border-radius:2px;background:#f4f4f4;" onchange="songChainRows[${i}].bpmMode=this.value">
+        ${SONG_BPM_MODES.map(m=>`<option${row.bpmMode===m?' selected':''}>${m}</option>`).join('')}
+      </select>
+      <input type="number" value="${row.bpmVal}" min="40" max="300" style="font-size:8px;padding:1px 2px;border:1px solid #bbb;border-radius:2px;background:#fafafa;width:100%;box-sizing:border-box;" oninput="songChainRows[${i}].bpmVal=+this.value">
+      <div onclick="songDeleteRow(${i})" style="background:#dd2222;color:#fff;font-size:9px;font-weight:bold;width:18px;height:18px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid #aa0000;">✕</div>`;
+    chain.appendChild(rowEl);
+  });
+}
+
+function songTogglePlay(){
+  songPlaying=!songPlaying;
+  const btn=document.getElementById('songPlayBtn');
+  if(btn){
+    btn.textContent=songPlaying?'■ STOP':'▶ PLAY';
+    btn.style.background=songPlaying?'linear-gradient(180deg,#ff7777,#cc0000)':'linear-gradient(180deg,#44ddff,#0099cc)';
+    btn.style.borderColor=songPlaying?'#aa0000':'#0077aa';
+  }
+}
+function songStop(){ if(songPlaying) songTogglePlay(); }
+function songClear(){ if(confirm('チェーンをクリアしますか？')){ songChainRows=[]; renderSongChain(); } }
+
+// 初期デモ行
+window.addEventListener('load',()=>{
+  [['A',1],['A',2],['B',1],['B',2],['C',4],['D',2],['A',1]].forEach(([b,p])=>{
+    songChainRows.push({bank:b,ptn:p,rpt:1,comment:'',bpmMode:'INPUT',bpmVal:120});
+  });
+  renderSongChain();
+});
+
+function songStop_old(){ }
+function songToggleLoop(){ }
+function songFill(){ }
+function songBarsChange(d){ }
+let _songT=null;
+function songTick(){
+  if(!songPlaying) return;
+  songPlayHead=(songPlayHead+1)%songBars;
+  if(songPlayHead===0&&!songLoopOn){songStop();return;}
+  drawSong();
+  _songT=setTimeout(songTick,60000/(120*4));
+}
+
+// ── 新ページ init ──────────────────────────────────
+window.addEventListener('load',()=>{
+  drawMix();
+  // drawSong(); // SONGページはHTML描画に変更
+  buildFxKnobs('fxRevK',[{nm:'SIZE',v:.6,c:'#00ff88'},{nm:'DAMP',v:.4,c:'#00ff88'},{nm:'MIX',v:.5,c:'#00ff88'},{nm:'PRE',v:.2,c:'#00ff88'}]);
+  buildFxKnobs('fxDlyK',[{nm:'TIME',v:.4,c:'#00d4ff'},{nm:'FDBK',v:.3,c:'#00d4ff'},{nm:'MIX',v:.45,c:'#00d4ff'},{nm:'PAN',v:.5,c:'#00d4ff'}]);
+  buildFxKnobs('fxDistK',[{nm:'DRV',v:.3,c:'#ff8800'},{nm:'TONE',v:.5,c:'#ff8800'},{nm:'MIX',v:.4,c:'#ff8800'}]);
+  buildFxKnobs('fxCompK',[{nm:'THR',v:.6,c:'#ffdd00'},{nm:'RATIO',v:.4,c:'#ffdd00'},{nm:'ATK',v:.2,c:'#ffdd00'},{nm:'REL',v:.5,c:'#ffdd00'},{nm:'GAIN',v:.7,c:'#ffdd00'}]);
+  buildFxKnobs('fxEqK',[{nm:'LOW',v:.5,c:'#ffdd00'},{nm:'LO-M',v:.55,c:'#ffdd00'},{nm:'HI-M',v:.45,c:'#ffdd00'},{nm:'HIGH',v:.6,c:'#ffdd00'}]);
+  buildFxKnobs('fxLimK',[{nm:'CEIL',v:.9,c:'#ff8800'},{nm:'REL',v:.3,c:'#ff8800'},{nm:'GAIN',v:.7,c:'#ff8800'}]);
+  // Rack knobs
+  buildFxKnobs('compKnobs',[
+    {nm:'INPUT',v:.7,c:'#ffdd00',sz:22,vc:'#000'},
+    {nm:'ATTK', v:.3,c:'#ffdd00',sz:22,vc:'#000'},
+    {nm:'REL',  v:.4,c:'#ffdd00',sz:22,vc:'#000'},
+    {nm:'RATIO',v:.0,c:'#ff8800',sz:22,vc:'#000',ratioMode:true},
+    {nm:'OUTPUT',v:.8,c:'#ffdd00',sz:22,vc:'#000'},
+  ]);
+  buildFxKnobs('eqKnobs',[
+    {nm:'LO',      v:.5, c:'#00d4ff',sz:22,vc:'#000'},
+    {nm:'MID FREQ',v:.55,c:'#00d4ff',sz:22,vc:'#000'},
+    {nm:'GAIN',    v:.5, c:'#ffdd00',sz:22,vc:'#000'},
+    {nm:'HI',      v:.6, c:'#00d4ff',sz:22,vc:'#000'},
+  ]);
+  // ON/OFF buttons
+  document.getElementById('compOnBtn')?.addEventListener('click',e=>e.target.classList.toggle('off'));
+  document.getElementById('eqOnBtn')?.addEventListener('click',e=>e.target.classList.toggle('off'));
+  buildFxKnobs('isoK0',[{nm:'',v:.5,c:'#aa33ff',sz:32,vc:'#000'}]);
+  buildFxKnobs('isoK1',[{nm:'',v:.7,c:'#00d4ff',sz:32,vc:'#000'}]);
+  buildFxKnobs('isoK2',[{nm:'',v:.4,c:'#00ff88',sz:32,vc:'#000'}]);
+  // 1-knob effects
+  [{id:'r1kk0',c:'#aa33ff'},{id:'r1kk1',c:'#00d4ff'},{id:'r1kk2',c:'#00ff88'},{id:'r1kk3',c:'#ff8800'}].forEach((k)=>{
+    buildFxKnobs(k.id,[{nm:'',v:.4,c:k.c,sz:32,vc:'#000'}]);
+  });
+  // MFX knobs
+  buildKnobsInRow('mfxKnobsRow',[
+    {nm:'STEP',v:16,mn:1,mx:64,c:'#00d4ff'},{nm:'TEMPO',v:120,mn:40,mx:240,c:'#aa33ff'},
+    {nm:'SWING',v:0,mn:0,mx:100,c:'#ff2d78'},{nm:'VOL',v:80,mn:0,mx:127,c:'#00ff88'}
+  ]);
+  // MFX canvas SE.XY pad
+  initMfxCanvas();
+});
+
+// ── MASTER FX XY PAD STATE ──
+let mfxSelX=new Set(), mfxSelY=new Set();
+let mfxDotX=0.5, mfxDotY=0.5;
+let mfxDragging=false;
+let mfxW=0, mfxH=0;
+const MFX_BOX_W=38, MFX_BOX_H=28, MFX_PAD_L=44, MFX_PAD_B=34;
+const mfxLabels=['BASS A\nFILTER','BASS B\nFILTER','FX A','FX B','FX C'];
+// パラメーター定義
+const mfxDefs=[
+  {nm:'BASS A\nFILTER', xKey:'bassA.cutoff', yKey:'bassA.res'},
+  {nm:'BASS B\nFILTER', xKey:'bassB.cutoff', yKey:'bassB.res'},
+  {nm:'FX A',            xKey:'fxA.cutoff',   yKey:'fxA.cutoff'},
+  {nm:'FX B',            xKey:'fxB.freq',     yKey:'fxB.freq'},
+  {nm:'FX C',            xKey:'fxC.depth',    yKey:'fxC.depth'},
+];
+// XY値を実際のパラメーターに反映（将来のオーディオ接続用）
+function mfxApply(nx,ny){
+  mfxSelX.forEach(i=>{
+    const k=mfxDefs[i].xKey;
+    // synthState拡張 or 将来のWebAudioノードへ
+  });
+  mfxSelY.forEach(i=>{
+    const k=mfxDefs[i].yKey;
+  });
+}
+
+function initMfxCanvas(){
+  const c=document.getElementById('mfxCanvas'); if(!c)return;
+  const dpr=window.devicePixelRatio||1;
+  mfxW=c.parentElement.clientWidth;
+  mfxH=Math.round(mfxW*0.68);
+  c.width=Math.round(mfxW*dpr); c.height=Math.round(mfxH*dpr);
+  c.style.height=mfxH+'px';
+  c.style.display='block'; c.style.width='100%';
+  drawMfxCanvas();
+
+  // イベント設定（重複防止）
+  c.onmousedown=mfxPointerDown;
+  c.ontouchstart=e=>{e.preventDefault();mfxPointerDown(e.touches[0]);};
+  c.onmousemove=e=>{if(mfxDragging)mfxPointerMove(e);};
+  c.ontouchmove=e=>{e.preventDefault();if(mfxDragging)mfxPointerMove(e.touches[0]);};
+  c.onmouseup=()=>mfxDragging=false;
+  c.ontouchend=()=>mfxDragging=false;
+}
+
+function mfxGetPos(e){
+  const c=document.getElementById('mfxCanvas');
+  const r=c.getBoundingClientRect();
+  return {x:(e.clientX-r.left)*mfxW/r.width, y:(e.clientY-r.top)*mfxH/r.height};
+}
+
+function mfxBoxes(){
+  const vStep=(mfxH-MFX_PAD_B)/mfxLabels.length;
+  const hStep=(mfxW-MFX_PAD_L)/mfxLabels.length;
+  const yBoxes=mfxLabels.map((_,i)=>({
+    x:2, y:4+i*vStep+(vStep-MFX_BOX_H)/2, w:MFX_BOX_W, h:MFX_BOX_H, i
+  }));
+  const xBoxes=mfxLabels.map((_,i)=>({
+    x:MFX_PAD_L+i*hStep+(hStep-MFX_BOX_W)/2, y:mfxH-MFX_BOX_H-2, w:MFX_BOX_W, h:MFX_BOX_H, i
+  }));
+  return {yBoxes,xBoxes};
+}
+
+function mfxPointerDown(e){
+  const {x,y}=mfxGetPos(e);
+  const {yBoxes,xBoxes}=mfxBoxes();
+  // Y軸ボックス（左列）クリック判定
+  for(const b of yBoxes){
+    if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){
+      mfxSelY.has(b.i)?mfxSelY.delete(b.i):mfxSelY.add(b.i);
+      drawMfxCanvas(); return;
+    }
+  }
+  // X軸ボックス（下列）クリック判定
+  for(const b of xBoxes){
+    if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){
+      mfxSelX.has(b.i)?mfxSelX.delete(b.i):mfxSelX.add(b.i);
+      drawMfxCanvas(); return;
+    }
+  }
+  // パッドエリアでドラッグ開始
+  mfxDragging=true;
+  mfxDotX=Math.max(0,Math.min(1,(x-MFX_PAD_L)/(mfxW-MFX_PAD_L)));
+  mfxDotY=Math.max(0,Math.min(1,y/(mfxH-MFX_PAD_B)));
+  mfxApply(mfxDotX,mfxDotY);
+  drawMfxCanvas();
+}
+
+function mfxPointerMove(e){
+  const {x,y}=mfxGetPos(e);
+  mfxDotX=Math.max(0,Math.min(1,(x-MFX_PAD_L)/(mfxW-MFX_PAD_L)));
+  mfxDotY=Math.max(0,Math.min(1,y/(mfxH-MFX_PAD_B)));
+  mfxApply(mfxDotX,mfxDotY);
+  drawMfxCanvas();
+}
+
+function drawMfxCanvas(){
+  const c=document.getElementById('mfxCanvas'); if(!c)return;
+  const dpr=window.devicePixelRatio||1;
+  const W=mfxW, H=mfxH;
+  const cx=c.getContext('2d');
+  cx.setTransform(dpr,0,0,dpr,0,0);
+
+  // 背景
+  cx.fillStyle='#04040e'; cx.fillRect(0,0,W,H);
+
+  // グリッド
+  for(let i=0;i<=8;i++){
+    cx.strokeStyle='#4455aa'; cx.lineWidth=1;
+    cx.beginPath(); cx.moveTo(W/8*i,0); cx.lineTo(W/8*i,H); cx.stroke();
+  }
+  for(let i=0;i<=6;i++){
+    cx.strokeStyle='#4455aa'; cx.lineWidth=1;
+    cx.beginPath(); cx.moveTo(0,H/6*i); cx.lineTo(W,H/6*i); cx.stroke();
+  }
+
+  // ドット
+  const dx=MFX_PAD_L+mfxDotX*(W-MFX_PAD_L);
+  const dy=mfxDotY*(H-MFX_PAD_B);
+  // X線
+  if(mfxSelX.size>0||mfxSelY.size>0){
+    cx.strokeStyle='rgba(255,136,0,.25)'; cx.lineWidth=1;
+    cx.beginPath(); cx.moveTo(dx,0); cx.lineTo(dx,H); cx.stroke();
+    cx.beginPath(); cx.moveTo(0,dy); cx.lineTo(W,dy); cx.stroke();
+  }
+  const dg=cx.createRadialGradient(dx,dy,0,dx,dy,12);
+  dg.addColorStop(0,'#ff8800'); dg.addColorStop(1,'#ff880000');
+  cx.beginPath(); cx.arc(dx,dy,12,0,Math.PI*2); cx.fillStyle=dg; cx.fill();
+  cx.beginPath(); cx.arc(dx,dy,4,0,Math.PI*2);
+  cx.fillStyle='#ff8800'; cx.shadowColor='#ff8800'; cx.shadowBlur=10; cx.fill(); cx.shadowBlur=0;
+
+  // ラベル
+  cx.font='bold 11px monospace'; cx.fillStyle='#8899cc';
+  cx.textAlign='center'; cx.textBaseline='top';
+  cx.fillText('FREQ →',W/2,4);
+  cx.save(); cx.translate(10,H/2); cx.rotate(-Math.PI/2);
+  cx.fillText('DEPTH',0,0); cx.restore();
+
+  // ボックス描画
+  const {yBoxes,xBoxes}=mfxBoxes();
+  [...yBoxes.map((b,i)=>({...b,sel:mfxSelY.has(i)})),
+   ...xBoxes.map((b,i)=>({...b,sel:mfxSelX.has(i)}))].forEach(b=>{
+    cx.fillStyle=b.sel?'#1a1200':'#0d0d22';
+    cx.strokeStyle=b.sel?'#ff8800':'#4455aa';
+    cx.lineWidth=b.sel?2:.8;
+    if(b.sel){cx.shadowColor='#ff8800'; cx.shadowBlur=6;}
+    cx.beginPath(); cx.roundRect(b.x,b.y,b.w,b.h,3); cx.fill(); cx.stroke();
+    cx.shadowBlur=0;
+    cx.fillStyle=b.sel?'#ff8800':'#8899dd';
+    cx.font='bold 8px monospace';
+    cx.textAlign='center'; cx.textBaseline='middle';
+    mfxLabels[b.i].split('\n').forEach((l,li,a)=>
+      cx.fillText(l,b.x+b.w/2,b.y+b.h/2+(li-(a.length-1)/2)*8));
+  });
+
+  // タイトル
+  cx.font='bold 10px monospace'; cx.fillStyle='#ff8800';
+  cx.textAlign='right'; cx.textBaseline='top';
+  cx.fillText('SE.XY PAD',W-6,4);
+
+  // 選択中パラメーター表示
+  if(mfxSelX.size>0||mfxSelY.size>0){
+    const xNames=[...mfxSelX].map(i=>mfxDefs[i].xKey.split('.')[1].toUpperCase()).join(',');
+    const yNames=[...mfxSelY].map(i=>mfxDefs[i].yKey.split('.')[1].toUpperCase()).join(',');
+    cx.font='bold 7px monospace'; cx.textAlign='left'; cx.textBaseline='bottom';
+    cx.fillStyle='rgba(255,136,0,.7)';
+    if(xNames) cx.fillText('X: '+xNames, MFX_PAD_L+4, H-MFX_PAD_B-2);
+    if(yNames) cx.fillText('Y: '+yNames, MFX_PAD_L+4, H-MFX_PAD_B-12);
+  }
+}
+
+function buildKnobsInRow(id, defs){
+  const row=document.getElementById(id); if(!row) return;
+  row.innerHTML='';
+  defs.forEach(k=>{
+    const n=(k.v-k.mn)/(k.mx-k.mn);
+    const ang=-135+n*270;
+    const div=document.createElement('div'); div.className='kw';
+    div.innerHTML=`<div class="kn">${k.nm}</div>
+<div class="knob-body"><svg class="knob-svg" viewBox="0 0 36 36">
+<circle cx="18" cy="18" r="13" fill="none" stroke="#111128" stroke-width="2"/>
+</svg>
+<div class="knob-dial"><div class="knob-ind" style="background:${k.c};transform:translateX(-50%) translateY(-100%) rotate(${ang}deg)"></div></div>
+</div>
+<div class="knob-val">${k.v}</div>`;
+    row.appendChild(div);
+  });
+}
+
+
+let keySelectTarget=null;
+const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+function openKeySelect(ab){
+  keySelectTarget=ab;
+  const popup=document.getElementById('keySelectPopup');
+  const grid=document.getElementById('keySelectGrid');
+  grid.innerHTML='';
+  ['M','m'].forEach(mode=>{
+    NOTES.forEach(note=>{
+      const btn=document.createElement('div');
+      btn.textContent=note;
+      const isM=mode==='M';
+      btn.style.cssText='padding:2px 1px;border-radius:3px;font-size:8px;font-weight:bold;text-align:center;cursor:pointer;background:'+(isM?'#1a3a6a':'#3a1a6a')+';border:1px solid '+(isM?'#3366aa':'#6633aa')+';color:'+(isM?'#88bbff':'#cc88ff')+';';
+      btn.title=note+' '+mode;
+      btn.onclick=()=>selectKey(note+' '+mode);
+      grid.appendChild(btn);
+    });
+    const sep=document.createElement('div');
+    sep.style.cssText='grid-column:1/-1;height:3px;';
+    grid.appendChild(sep);
+  });
+  popup.style.display='block';
+}
+
+function selectKey(key){
+  const btn=document.getElementById('keyBtn'+keySelectTarget);
+  if(btn) btn.textContent=key||'－';
+  document.getElementById('keySelectPopup').style.display='none';
+}
+
+document.addEventListener('click',e=>{
+  const popup=document.getElementById('keySelectPopup');
+  if(popup&&!popup.contains(e.target)&&!e.target.classList.contains('key-btn')){
+    popup.style.display='none';
+  }
+});
+
+function fxSelBtn(el){
+  el.closest(".rack-unit").querySelectorAll(".fx-sel-btn").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+  const lbl=document.getElementById('isoLabel');
+  if(lbl) lbl.textContent=el.textContent;
+}
+
+function mfxSetLcd(mode,el){
+  document.querySelectorAll('#page-fx .sel-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  initMfxCanvas();
+}
+window.addEventListener('resize',()=>{ drawMix(); });
+</script>
+</body>
+</html>
